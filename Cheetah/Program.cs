@@ -5,8 +5,35 @@ namespace Cheetah
 {
     public class Program
     {
+        private static readonly string CHEETAH = 
+            "                                    __...__                       \n" +
+            "                 .'`*-.        _.-*'       `*-._                  \n" +
+            "            _.-*'      `+._.-*'                 `*-._             \n" +
+            "       _.-*'           \\  `-                         `*-.        \n" +
+            "    .-'  .--+           .                                `.       \n" +
+            "  .'   _/,'`|           :                                  \\     \n" +
+            "         ;  :                                            `  ;     \n" +
+            " ;  s,     .'           ;                            /    ; |     \n" +
+            "    \"                  |                          .'     : :     \n" +
+            ":_        _.-._         :                                    .    \n" +
+            " `T\"    .'     \\                              .-'.         : \\ \n" +
+            "   `._.-'        \\        ;                .-*'    `.          ` \n" +
+            "                  `.      :           _.-*';`*-.__.-*\\      ;.   \n" +
+            "                   ;     ;`-.____.+*'     |      .'  .     |  `-. \n" +
+            "                   |   -* `.      ,       :     :          :      \n" +
+            "                   :    ;   `.    :             ;     ;    ;      \n" +
+            "                   |          `.   ,       ;          :           \n" +
+            "                   ;   '        \\  :           :       .  :      \n" +
+            "                      ,          \\  \\       ;   `.     ;  '     \n" +
+            "                  :  /            .  ,      :    /     :   \\     \n" +
+            "              _._/  /          _._:  ;  _._/   .'       .  /      \n" +
+            "            .'     /         .'     / .'     .'     _._/  /       \n" +
+            "             *---*'           *---*'   *---*'     .'     /        \n" +
+            "                                                   *---*'         \n";
+
         public static void Main(string[] args)
         {
+            Console.WriteLine(CHEETAH);
             Console.WriteLine("Welcome to a .NET eventual consistency application");
             Console.WriteLine("");
 
