@@ -20,5 +20,9 @@ namespace ViewService
         /// Shuts down the Client simulating an unhandled exception or a physical failure.
         /// </summary>
         void Abort();
+        /// <summary>
+        /// Returns the current total amount of views that the service knows of.
+        /// </summary>
+        void GetViewCount();
     }
 }
