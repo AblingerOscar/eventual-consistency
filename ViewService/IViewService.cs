@@ -23,6 +23,7 @@ namespace ViewService
         /// <summary>
         /// Returns the current total amount of views that the service knows of.
         /// </summary>
-        void GetViewCount();
+        /// <returns>Current total amount of views that the service knows of</returns>
+        int GetViewCount();
     }
 }
