@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViewService", "ViewService\ViewService.csproj", "{A8D465EE-0AA3-4F37-AF9A-0849887AB721}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ViewService", "ViewService\ViewService.csproj", "{A8D465EE-0AA3-4F37-AF9A-0849887AB721}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cheetah", "Cheetah\Cheetah.csproj", "{53DF3951-2E5D-44C2-8372-4D1F68445A89}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cheetah", "Cheetah\Cheetah.csproj", "{53DF3951-2E5D-44C2-8372-4D1F68445A89}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedClasses", "SharedClasses\SharedClasses.csproj", "{595AE877-AB2D-4E6E-8039-19948BBE693D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedClasses", "SharedClasses\SharedClasses.csproj", "{595AE877-AB2D-4E6E-8039-19948BBE693D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{9C96E540-D625-4BFC-A6F8-070111F3503D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "Client\Client.csproj", "{9C96E540-D625-4BFC-A6F8-070111F3503D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulator", "Simulator\Simulator.csproj", "{E472277B-4253-40FC-92E6-EBAB13C63B42}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{9C96E540-D625-4BFC-A6F8-070111F3503D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C96E540-D625-4BFC-A6F8-070111F3503D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C96E540-D625-4BFC-A6F8-070111F3503D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E472277B-4253-40FC-92E6-EBAB13C63B42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E472277B-4253-40FC-92E6-EBAB13C63B42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E472277B-4253-40FC-92E6-EBAB13C63B42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E472277B-4253-40FC-92E6-EBAB13C63B42}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
