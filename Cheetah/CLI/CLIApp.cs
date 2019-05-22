@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Cheetah.CLI
@@ -10,6 +11,20 @@ namespace Cheetah.CLI
         private bool running = false;
 
         public string inputPrompt = "> ";
+
+        public void AddCommand(
+            string name,
+            Action<Arguments> action,
+            string[] description,
+            string[] aliases = null)
+        {
+            AddCommand(
+                name,
+                action,
+                description.Aggregate((aggr, next) => aggr + "\n" + next),
+                aliases
+            );
+        }
 
         public void AddCommand(
             string name,
@@ -42,12 +57,17 @@ namespace Cheetah.CLI
             {
                 Console.Write(inputPrompt);
                 var input = Console.ReadLine();
-                var cmdName = input.Split(' ', 2)[0];
-                if (commands.ContainsKey(cmdName))
-                    ExecuteCommand(cmdName, input);
-                else
-                    NoSuchCommandInfo(cmdName);
+                DispatchCommand(input);
             }
+        }
+
+        public void DispatchCommand(string command)
+        {
+            var cmdName = command.Split(' ', 2)[0];
+            if (commands.ContainsKey(cmdName))
+                ExecuteCommand(cmdName, command);
+            else
+                NoSuchCommandInfo(cmdName);
         }
 
         private void ExecuteCommand(string cmdName, string input)
