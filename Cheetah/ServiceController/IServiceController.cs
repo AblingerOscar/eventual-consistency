@@ -2,18 +2,26 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using ViewService;
 
 namespace Cheetah.ServiceController
 {
+    internal delegate void OnServiceLogHandler(IServiceController source, OnServiceLogHandlerArgs args);
+
     internal interface IServiceController
     {
         IReadOnlyList<ServiceInformation> RunningServices { get; }
         IReadOnlyList<ServiceInformation> AllServices { get; }
 
         /// <summary>
+        /// The piped log event from any viewService
+        /// </summary>
+        event OnServiceLogHandler OnServiceLog;
+
+        /// <summary>
         /// Creates not only the service, but also a client for it
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The information object of the new Service</returns>
         ServiceInformation CreateNewService();
         /// <summary>
         /// Starts an existing Service.
@@ -26,8 +34,7 @@ namespace Cheetah.ServiceController
         /// Stops an existing Service
         /// </summary>
         /// <param name="si">The service information for the service to stop</param>
-        /// <returns>Whether it was successfully stopped</returns>
-        bool StopService(ServiceInformation si);
+        void StopService(ServiceInformation si);
         /// <summary>
         /// Aborts a service
         /// </summary>
@@ -38,8 +45,7 @@ namespace Cheetah.ServiceController
         /// </summary>
         /// <param name="si">The service information for the service to send the views to</param>
         /// <param name="amount">The amount of views to send. Must be at least 1</param>
-        /// <returns>A task that completes once all views were sent</returns>
-        Task<ServiceInformation> SendViews(ServiceInformation si, int amount = 1);
+        void SendViews(ServiceInformation si, int amount = 1);
         /// <summary>
         /// Asks the client to start sending views in regular intervals to the given service.
         /// Replaces an old one, if one is already existing
@@ -52,7 +58,6 @@ namespace Cheetah.ServiceController
         /// Asks the client to stop sending repeated views to its service
         /// </summary>
         /// <param name="si">The service information for the service that the task should be stopped</param>
-        /// <returns>Wheter there was an ongoing task running</returns>
-        bool StopSendingRepeatedViewsToService(ServiceInformation si);
+        void StopSendingRepeatedViewsToService(ServiceInformation si);
     }
 }

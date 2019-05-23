@@ -3,6 +3,7 @@ using Cheetah.ServiceController;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ViewService;
 
 namespace Cheetah
 {
@@ -45,17 +46,35 @@ namespace Cheetah
 
         CLIApp cli;
         IServiceController serviceController;
+        ISet<OutputLevel> disabledOutputLevels;
+        ISet<LogReason> disabledReasons;
 
         private void InitializeCLI()
         {
             cli = new CLIApp();
             serviceController = new ServiceController.ServiceController();
+            disabledOutputLevels = new HashSet<OutputLevel>();
+            disabledReasons = new HashSet<LogReason>();
 
-            AddCommands();
+            RegisterLogging();
+
+            AddCLICommands();
+            AddServiceCommands();
+            AddLoggingCommands();
             cli.Start();
         }
 
-        private void AddCommands()
+        private void RegisterLogging()
+        {
+            serviceController.OnServiceLog += (controller, args) =>
+            {
+                if (!disabledOutputLevels.Contains(args.OriginalArgs.OutputLevel) &&
+                   !disabledReasons.Contains(args.OriginalArgs.Reason))
+                    Console.WriteLine($"{args.ServiceInformation.ID} ({args.OriginalArgs.Reason}) > {args.OriginalArgs.Text}");
+            };
+        }
+
+        private void AddCLICommands()
         {
             cli.AddCommand(
                 "help",
@@ -68,6 +87,10 @@ namespace Cheetah
                 (args) => cli.Stop(),
                 "Stops all applications and exits the CLI",
                 new string[] { "shutdown" });
+        }
+
+        private void AddServiceCommands()
+        {
             cli.AddCommand(
                 "create",
                 AddCommand,
@@ -129,6 +152,30 @@ namespace Cheetah
                 );
         }
 
+        private void AddLoggingCommands()
+        {
+            cli.AddCommand(
+                "hide",
+                HideCommand,
+                new string[]
+                {
+                    "Hides Logs of the given output level or reason",
+                    "Usage: hide reason <reason>",
+                    "       hide level <level>"
+                }
+                );
+            cli.AddCommand(
+                "show",
+                ShowCommand,
+                new string[]
+                {
+                    "Shows Logs of the given output level or reason again",
+                    "Usage: show reason <reason>",
+                    "       show level <level>"
+                }
+                );
+        }
+
         private ServiceInformation ReadServiceInformation(Arguments args, string helpCommand, int argsPosition = 1)
         {
             int? id = args.GetInt(argsPosition);
@@ -181,8 +228,8 @@ namespace Cheetah
         {
             if (si != null)
             {
-                bool success = serviceController.StopService(si);
-                Console.WriteLine($"{(success ? "S" : "Uns")}uccessfully stopped the service");
+                serviceController.StopService(si);
+                Console.WriteLine("Stopped the service");
             }
         }
 
@@ -293,8 +340,54 @@ namespace Cheetah
             else
                 services = serviceController.RunningServices;
 
-            foreach(var service in services)
+            foreach (var service in services)
                 Console.WriteLine(service.ToString());
+        }
+        
+        private void HideCommand(Arguments args)
+        {
+            if (args.ArgumentList.Length <= 2)
+            {
+                cli.DispatchCommand("help hide");
+                return;
+            }
+
+            if(args.ArgumentList[1] == "reason")
+            {
+                if(Enum.TryParse(args.ArgumentList[2], out LogReason reason))
+                {
+                    disabledReasons.Add(reason);
+                    Console.WriteLine("Hid reason " + reason);
+                }
+            } else if (args.ArgumentList[1] == "level")
+            {
+                if(Enum.TryParse(args.ArgumentList[2], out OutputLevel level))
+                {
+                    disabledOutputLevels.Add(level);
+                    Console.WriteLine("Hid level " + level);
+                }
+            } else
+                cli.DispatchCommand("help hide");
+        }
+
+        private void ShowCommand(Arguments args)
+        {
+            if (args.ArgumentList.Length <= 2)
+            {
+                cli.DispatchCommand("help show");
+                return;
+            }
+
+            if(args.ArgumentList[1] == "reason" && Enum.TryParse(args.ArgumentList[2], out LogReason reason))
+            {
+                disabledReasons.Remove(reason);
+                Console.WriteLine("Activated logs for a reason " + reason);
+            } else if (args.ArgumentList[1] == "level" && Enum.TryParse(args.ArgumentList[2], out OutputLevel level))
+            {
+                disabledOutputLevels.Remove(level);
+                Console.WriteLine("Activated logs for level " + level);
+            } else
+                cli.DispatchCommand("help hide");
         }
         #endregion
     }

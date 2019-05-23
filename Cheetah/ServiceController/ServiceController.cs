@@ -12,6 +12,8 @@ namespace Cheetah.ServiceController
     {
         private List<ServiceInformation> services;
 
+        public event OnServiceLogHandler OnServiceLog;
+
         public IReadOnlyList<ServiceInformation> RunningServices => services.Where(s => s.IsRunning).ToList().AsReadOnly();
         public IReadOnlyList<ServiceInformation> AllServices => services.AsReadOnly();
 
@@ -30,10 +32,18 @@ namespace Cheetah.ServiceController
         {
             ICheetahViewService service = null; //new ViewService(); TODO
             IClient client = null; //new Client();
-            return new ServiceInformation(IDService.GenerateNextID(), service, client);
+
+            var si = new ServiceInformation(IDService.GenerateNextID(), service, client);
+
+            service.OnLog += (sender, args) =>
+            {
+                OnServiceLog?.Invoke(this, new OnServiceLogHandlerArgs(si, args));
+            };
+
+            return si;
         }
 
-        public Task<ServiceInformation> SendViews(ServiceInformation si, int amount = 1)
+        public void SendViews(ServiceInformation si, int amount = 1)
         {
             si.Client.AddViews(amount);
         }
@@ -53,12 +63,12 @@ namespace Cheetah.ServiceController
             return false;
         }
 
-        public bool StopSendingRepeatedViewsToService(ServiceInformation si)
+        public void StopSendingRepeatedViewsToService(ServiceInformation si)
         {
             si.Client.StopPeriodicRequests();
         }
 
-        public bool StopService(ServiceInformation si)
+        public void StopService(ServiceInformation si)
         {
             si.Service.ShutDown();
             si.IsRunning = false;
