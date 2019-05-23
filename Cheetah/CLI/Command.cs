@@ -24,7 +24,7 @@ namespace Cheetah.CLI
         {
             return $"{Name}: {Description.Replace("\n", "\n\t")}\n" +
                 (Aliases.Length > 0
-                    ? $"\tAliases: {Aliases.Aggregate((t, n) => t + ", " + n)}"
+                    ? $"\tAliases: {Aliases.Aggregate((t, n) => t + ", " + n)}\n"
                     : "");
         }
     }
