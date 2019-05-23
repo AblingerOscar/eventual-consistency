@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Client
 {
-    interface IClient
+    public interface IClient
     {
         /// <summary>
         /// On setup an uid for a service is defined. Therefore, one client
