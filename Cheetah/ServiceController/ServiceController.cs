@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Client;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ViewService;
 
 namespace Cheetah.ServiceController
 {
@@ -20,37 +22,46 @@ namespace Cheetah.ServiceController
 
         public void AbortService(ServiceInformation si)
         {
-            throw new NotImplementedException();
+            si.Service.Abort();
+            si.IsRunning = false;
         }
 
         public ServiceInformation CreateNewService()
         {
-            throw new NotImplementedException();
+            ICheetahViewService service = null; //new ViewService(); TODO
+            IClient client = null; //new Client();
+            return new ServiceInformation(IDService.GenerateNextID(), service, client);
         }
 
         public Task<ServiceInformation> SendViews(ServiceInformation si, int amount = 1)
         {
-            throw new NotImplementedException();
+            si.Client.AddViews(amount);
         }
 
         public void StartSendingRepeatedViewsToService(ServiceInformation si, int interval, int amount = 1)
         {
-            throw new NotImplementedException();
+            si.Client.StartPeriodicRequests(amount, interval);
         }
 
         public bool StartService(ServiceInformation si)
         {
-            throw new NotImplementedException();
+            if (si.IsRunning)
+                return true;
+
+            si.Service.StartUp(IDService.GetServiceUIDForId(si.ID), "TODO");
+            si.IsRunning = true;
+            return false;
         }
 
         public bool StopSendingRepeatedViewsToService(ServiceInformation si)
         {
-            throw new NotImplementedException();
+            si.Client.StopPeriodicRequests();
         }
 
         public bool StopService(ServiceInformation si)
         {
-            throw new NotImplementedException();
+            si.Service.ShutDown();
+            si.IsRunning = false;
         }
     }
 }

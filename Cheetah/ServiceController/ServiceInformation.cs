@@ -8,10 +8,17 @@ namespace Cheetah.ServiceController
     internal class ServiceInformation
     {
         public int ID { get; }
-        internal Thread ExecutionThread;
         internal ICheetahViewService Service;
         internal IClient Client;
         public bool IsRunning { get; internal set; }
+
+        public ServiceInformation(int ID, ICheetahViewService service, IClient client)
+        {
+            this.ID = ID;
+            Service = service;
+            Client = client;
+            IsRunning = false;
+        }
 
         public override string ToString()
         {
