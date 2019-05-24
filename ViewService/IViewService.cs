@@ -28,5 +28,15 @@ namespace ViewService
         /// </summary>
         /// <returns>Current total amount of views that the service knows of</returns>
         int GetViewCount();
+
+        /// <summary>
+        /// Increase the number of views for the service.
+        /// </summary>
+        void AddViews(int number = 1);
+
+        /// <summary>
+        /// Returns whether the service is running or stopped (not started, abort, or shutdown).
+        /// </summary>
+        bool IsRunning();
     }
 }
