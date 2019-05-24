@@ -84,7 +84,10 @@ namespace Cheetah
                 );
             cli.AddCommand(
                 "exit",
-                (args) => cli.Stop(),
+                (args) => {
+                    CloseServicesCommand();
+                    cli.Stop();
+                },
                 "Stops all applications and exits the CLI",
                 new string[] { "shutdown" });
         }
@@ -394,6 +397,23 @@ namespace Cheetah
                 Console.WriteLine("Activated logs for level " + level);
             } else
                 cli.DispatchCommand("help hide");
+        }
+
+        private void CloseServicesCommand()
+        {
+            var services = serviceController.AllServices;
+            foreach (var service in services)
+            {
+                if (service.Service.IsRunning())
+                {
+                    service.Service.ShutDown();
+                }
+
+                if (service.Client.IsSetup())
+                {
+                    service.Client.StopPeriodicRequests();
+                }
+            }
         }
         #endregion
     }
