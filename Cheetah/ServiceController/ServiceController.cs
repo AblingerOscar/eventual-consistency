@@ -61,7 +61,10 @@ namespace Cheetah.ServiceController
                 return true;
 
             // TODO: context path is DB location uri
-            si.Service.StartUp(IDService.GetServiceUIDForId(si.ID), "TODO");
+
+            var serviceId = IDService.GetServiceUIDForId(si.ID);
+            si.Service.StartUp(serviceId, "TODO");
+            si.Client.Setup(serviceId);
             si.IsRunning = true;
             return false;
         }
