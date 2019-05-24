@@ -201,9 +201,9 @@ namespace Cheetah
         private void AddCommand(Arguments args)
         {
             var si = serviceController.CreateNewService();
-            Console.WriteLine(si);
             if (args.ArgumentList.Length >= 2 && args.ArgumentList[1] == "--start")
                 serviceController.StartService(si);
+            Console.WriteLine(si);
         }
 
         private void StartCommand(Arguments args)
