@@ -10,19 +10,19 @@ namespace Gateway.Controllers
     [ApiController]
     public class GatewayController : ControllerBase
     {
-        [HttpGet("{service-uid}/views")]
+        [HttpGet("{serviceUid}/views")]
         public ActionResult<int> GetTotalViews(string serviceUid)
         {
             return Program.rpcClient.SendGetView(serviceUid);
         }
 
-        [HttpPost("{service-uid}/addView")]
+        [HttpPost("{serviceUid}/add-view")]
         public void AddView(string serviceUid)
         {
             Program.rpcClient.SendAddViews(serviceUid, 1);
         }
 
-        [HttpPost("{service-uid}/addView/{number}")]
+        [HttpPost("{serviceUid}/add-views/{number}")]
         public void AddViews(string serviceUid, int number)
         {
             Program.rpcClient.SendAddViews(serviceUid, number);
