@@ -1,6 +1,8 @@
 ﻿using Client;
+using SharedClasses;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -60,10 +62,8 @@ namespace Cheetah.ServiceController
             if (si.IsRunning)
                 return true;
 
-            // TODO: context path is DB location uri
-
             var serviceId = IDService.GetServiceUIDForId(si.ID);
-            si.Service.StartUp(serviceId, "TODO");
+            si.Service.StartUp(serviceId, Path.Combine(PersistenceConfiguration.DBDirectory, serviceId));
             si.Client.Setup(serviceId);
             si.IsRunning = true;
             return false;

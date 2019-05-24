@@ -75,7 +75,7 @@ namespace ViewService
             ServiceId = uid;
             IsRunning = true;
 
-            FilePath = Path.Combine(PersistenceConfiguration.DBDirectory, ServiceId);
+            FilePath = contextPath;
 
             if (!File.Exists(FilePath))
                 viewDO = new ViewDataObject();
