@@ -12,14 +12,17 @@ namespace ViewService
         /// <param name="uid">The unique identifier for the Client. Used to map views to (other) clients</param>
         /// <param name="contextPath">The folder in which the Client operates (e.g. saves their views)</param>
         void StartUp(string uid, string contextPath);
+
         /// <summary>
         /// Shuts down the Client gracefully. It persists its data and might send a last update to other Clients
         /// </summary>
         void ShutDown();
+
         /// <summary>
         /// Shuts down the Client simulating an unhandled exception or a physical failure.
         /// </summary>
         void Abort();
+
         /// <summary>
         /// Returns the current total amount of views that the service knows of.
         /// </summary>
