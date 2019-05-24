@@ -30,8 +30,8 @@ namespace Cheetah.ServiceController
 
         public ServiceInformation CreateNewService()
         {
-            ICheetahViewService service = null; //new ViewService(); TODO
-            IClient client = null; //new Client();
+            ICheetahViewService service = new ViewService.ViewService();
+            IClient client = new Client.Client();
 
             var si = new ServiceInformation(IDService.GenerateNextID(), service, client);
 
@@ -60,6 +60,7 @@ namespace Cheetah.ServiceController
             if (si.IsRunning)
                 return true;
 
+            // TODO: context path is DB location uri
             si.Service.StartUp(IDService.GetServiceUIDForId(si.ID), "TODO");
             si.IsRunning = true;
             return false;
