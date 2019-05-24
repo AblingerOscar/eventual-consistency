@@ -6,6 +6,6 @@ namespace SharedClasses
 {
     public static class ConnectionConfiguration
     {
-        public const string HostName = "https://localhost:5001/";
+        public const string HostName = "http://localhost:5001/";
     }
 }
