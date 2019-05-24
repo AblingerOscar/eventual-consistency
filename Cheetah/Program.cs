@@ -178,6 +178,12 @@ namespace Cheetah
 
         private ServiceInformation ReadServiceInformation(Arguments args, string helpCommand, int argsPosition = 1)
         {
+            if (args.ArgumentList.Length  < argsPosition + 1)
+            {
+                cli.DispatchCommand(helpCommand);
+                return null;
+            }
+
             int? id = args.GetInt(argsPosition);
             if (!id.HasValue)
             {
