@@ -335,7 +335,7 @@ namespace Cheetah
         {
             IEnumerable<ServiceInformation> services;
 
-            if (args.ArgumentList.Length >= 2 && args.ArgumentList[1] != "--running")
+            if (args.ArgumentList.Length < 2 || args.ArgumentList[1] != "--running")
                 services = serviceController.AllServices;
             else
                 services = serviceController.RunningServices;
