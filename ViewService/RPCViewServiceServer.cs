@@ -21,7 +21,7 @@ namespace ViewService
         {
             var factory = new ConnectionFactory()
             {
-                HostName = ConnectionConfiguration.HostName
+                HostName = RabbitMQConfiguration.HostName
             };
             connection = factory.CreateConnection();
             channel = connection.CreateModel();
