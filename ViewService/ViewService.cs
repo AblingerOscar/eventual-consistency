@@ -13,6 +13,7 @@ namespace ViewService
         private int ViewCount { get; set; } = 0;
         private bool IsRunning { get; set; } = false;
 
+        private RPCViewServiceServer rpcServer = null;
         private IConnection Connection { get; set; } = null;
         private IModel Channel { get; set; } = null;
 
@@ -66,7 +67,14 @@ namespace ViewService
             // TODO: read viewcount from local db
             ViewCount = 0;
 
-            // TODO: AddRPCViewServiceClientLogic();
+            rpcServer = new RPCViewServiceServer(
+                ServiceId,
+                (msg) => {
+                    OnLog?.Invoke(this, new OnLogHandlerArgs(msg, LogReason.ERROR, OutputLevel.ERROR));
+                },
+                GetViewCount,
+                number => AddViews(number ?? 1)
+            );
 
             DeclareChannel();
             InitializeViewCountUpdaterTimer();
@@ -93,6 +101,7 @@ namespace ViewService
 
         private void BroadcastViewCount(object args)
         {
+            // TODO: only on changes
             Channel.BasicPublish("", "routing-key", null, Encoding.UTF8.GetBytes("test"));
             OnViewUpdate?.Invoke(this, new OnViewUpdateHandlerArgs(ViewCount));
             OnLog?.Invoke(this, new OnLogHandlerArgs($"Sent {ViewCount}", LogReason.DEBUG));
