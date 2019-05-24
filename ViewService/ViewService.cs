@@ -57,6 +57,9 @@ namespace ViewService
                 viewUpdateTimer = null;
                 Connection.Close();
 
+                rpcServer.Dispose();
+                rpcServer = null;
+
                 string json = viewDO.ToJson();
                 File.WriteAllText(FilePath, json);
             }            
