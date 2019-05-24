@@ -28,9 +28,9 @@ namespace Client
                 throw new NotSetupException("Tried to access client methods before Setup(uid) was called");
 
             if (number == 1)
-                await client.PostAsync(ConnectionConfiguration.HostName + $"api/{uid}/addView", null);
+                await client.PostAsync(ConnectionConfiguration.HostName + $"api/{uid}/add-view", null);
             else
-                await client.PostAsync(ConnectionConfiguration.HostName + $"api/{uid}/addViews/{number}", null);
+                await client.PostAsync(ConnectionConfiguration.HostName + $"api/{uid}/add-views/{number}", null);
         }
 
         public void Setup(string uid)
