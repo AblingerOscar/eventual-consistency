@@ -40,6 +40,8 @@ namespace Cheetah.ServiceController
                 OnServiceLog?.Invoke(this, new OnServiceLogHandlerArgs(si, args));
             };
 
+            services.Add(si);
+
             return si;
         }
 
