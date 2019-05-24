@@ -47,7 +47,10 @@ namespace ViewService
         {
             if (IsRunning)
             {
-                return viewDO.OwnViews;
+                lock (addViewsLock)
+                {
+                    return viewDO.TotalViews;
+                }
             } else
             {
                 throw new NotSetupException(

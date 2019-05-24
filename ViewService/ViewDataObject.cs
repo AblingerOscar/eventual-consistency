@@ -10,6 +10,16 @@ namespace ViewService
         public int OwnViews { get; set; } = 0;
         public IDictionary<string, int> Views { get; set; } = new Dictionary<string, int>();
 
+        [JsonIgnore]
+        public int TotalViews {
+            get {
+                int total = OwnViews;
+                foreach (var kvp in Views)
+                    total += kvp.Value;
+                return total;
+            }
+        }
+
         public string ToJson()
         {
             return JsonConvert.SerializeObject(this);
