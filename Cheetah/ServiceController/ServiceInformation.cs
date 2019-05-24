@@ -22,9 +22,12 @@ namespace Cheetah.ServiceController
 
         public override string ToString()
         {
-            return $"service id: {ID}\n" +
-                $"is active: {IsRunning}\n" +
-                $"Estimated view count: {Service.GetViewCount()}";
+            string msg = $"service id: {ID}\n" + $"is active: {IsRunning}";
+            if (IsRunning)
+            {
+                msg += $"\nEstimated view count: {Service.GetViewCount()}";
+            }
+            return msg;
         }
     }
 }
