@@ -75,7 +75,7 @@ namespace Gateway
         {
             SendPublish(
                 serviceUid,
-                new RPCGatewayViewServiceDataObject(RPCGatewayViewServiceDataObject.RequestFunction.GET_VIEWS)
+                new RPCGatewayViewServiceDataObject(RPCGatewayViewServiceDataObject.RequestFunction.ADD_VIEWS, amount)
                 );
             string respString = respQueue.Take();
             if (respString != null)
