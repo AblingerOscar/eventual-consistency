@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading;
 using RabbitMQ.Client;
@@ -10,8 +11,9 @@ namespace ViewService
     public class ViewService : ICheetahViewService
     {
         private string ServiceId { get; set; }
-        private int ViewCount { get; set; } = 0;
         private bool IsRunning { get; set; } = false;
+        private string FilePath;
+        private ViewDataObject viewDO;
 
         private RPCViewServiceServer rpcServer = null;
         private IConnection Connection { get; set; } = null;
@@ -19,7 +21,6 @@ namespace ViewService
 
         private Timer viewUpdateTimer = null;
 
-        private IDictionary<string, int> views = new Dictionary<string, int>();
 
         private readonly static object addViewsLock = new object();
 
@@ -39,7 +40,7 @@ namespace ViewService
         {
             if (IsRunning)
             {
-                return ViewCount;
+                return viewDO.OwnViews;
             } else
             {
                 throw new NotSetupException(
@@ -52,8 +53,12 @@ namespace ViewService
             if (IsRunning)
             {
                 IsRunning = false;
-                // TODO: write to db before exiting
+                viewUpdateTimer.Dispose();
+                viewUpdateTimer = null;
                 Connection.Close();
+
+                string json = viewDO.ToJson();
+                File.WriteAllText(FilePath, json);
             }            
         }
 
@@ -62,10 +67,15 @@ namespace ViewService
             ServiceId = uid;
             IsRunning = true;
 
-            // TODO: context path is DB location uri
+            FilePath = Path.Combine(PersistenceConfiguration.DBDirectory, ServiceId);
 
-            // TODO: read viewcount from local db
-            ViewCount = 0;
+            if (!File.Exists(FilePath))
+                viewDO = new ViewDataObject();
+            else
+            {
+                string json = File.ReadAllText(FilePath);
+                viewDO = ViewDataObject.FromJson(json);
+            }
 
             rpcServer = new RPCViewServiceServer(
                 ServiceId,
@@ -103,19 +113,19 @@ namespace ViewService
         {
             // TODO: only on changes
             Channel.BasicPublish("", "routing-key", null, Encoding.UTF8.GetBytes("test"));
-            OnViewUpdate?.Invoke(this, new OnViewUpdateHandlerArgs(ViewCount));
-            OnLog?.Invoke(this, new OnLogHandlerArgs($"Sent {ViewCount}", LogReason.DEBUG));
+            OnViewUpdate?.Invoke(this, new OnViewUpdateHandlerArgs(viewDO.OwnViews));
+            OnLog?.Invoke(this, new OnLogHandlerArgs($"Sent {viewDO.OwnViews}", LogReason.DEBUG));
         }
 
         public void AddViews(int number = 1)
         {
             lock (addViewsLock)
             {
-                if (views.ContainsKey(ServiceId))
+                if (viewDO.Views.ContainsKey(ServiceId))
                 {
-                    views[ServiceId]++;
+                    viewDO.Views[ServiceId]++;
                 }
-                ViewCount += number;
+                viewDO.OwnViews += number;
             }
         }
 
