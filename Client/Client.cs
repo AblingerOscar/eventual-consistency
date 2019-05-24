@@ -39,7 +39,7 @@ namespace Client
             isSetup = true;
         }
 
-        public void StartPeriodicRequests(int number = 1, int intervalInMilliseconds = 5)
+        public void StartPeriodicRequests(int number = 1, int intervalInMilliseconds = 5000)
         {
             if (!isSetup)
                 throw new NotSetupException("Tried to access client methods before Setup(uid) was called");

@@ -26,7 +26,7 @@ namespace Client
         /// </summary>
         /// <param name="number"></param>
         /// <param name="intervalInSeconds"></param>
-        void StartPeriodicRequests(int number = 1, int intervalInMilliseconds = 5);
+        void StartPeriodicRequests(int number = 1, int intervalInMilliseconds = 5000);
 
         /// <summary>
         /// To stop periodic requests this method can be called.
