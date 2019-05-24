@@ -11,25 +11,21 @@ namespace Gateway.Controllers
     public class GatewayController : ControllerBase
     {
         [HttpGet("{service-uid}/views")]
-        public ActionResult<int> GetTotalViews(int serviceUid)
+        public ActionResult<int> GetTotalViews(string serviceUid)
         {
-            Console.WriteLine($"Get cumulated known views from {serviceUid}");
-            // TODO: get cumulated known views from service
-            return 0;
+            return Program.rpcClient.SendGetView(serviceUid);
         }
 
         [HttpPost("{service-uid}/addView")]
-        public void AddView(int serviceUid)
+        public void AddView(string serviceUid)
         {
-            Console.WriteLine($"Add view to {serviceUid}");
-            // TODO: add view to service with uid
+            Program.rpcClient.SendAddViews(serviceUid, 1);
         }
 
         [HttpPost("{service-uid}/addView/{number}")]
-        public void AddViews(int serviceUid, int number)
+        public void AddViews(string serviceUid, int number)
         {
-            Console.WriteLine($"Add {number} views to {serviceUid}");
-            // TODO: add number of views to service with uid
+            Program.rpcClient.SendAddViews(serviceUid, number);
         }
     }
 }
