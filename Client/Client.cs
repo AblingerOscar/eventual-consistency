@@ -67,5 +67,10 @@ namespace Client
             currTimer.Dispose();
             currTimer = null;
         }
+
+        bool IClient.IsSetup()
+        {
+            return isSetup;
+        }
     }
 }

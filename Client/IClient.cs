@@ -32,5 +32,10 @@ namespace Client
         /// To stop periodic requests this method can be called.
         /// </summary>
         void StopPeriodicRequests();
+
+        /// <summary>
+        /// Returns whether the client got initialized with method Setup().
+        /// </summary>
+        bool IsSetup();
     }
 }
