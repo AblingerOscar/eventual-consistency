@@ -58,6 +58,7 @@ namespace Cheetah.CLI
                 Console.Write(inputPrompt);
                 var input = Console.ReadLine();
                 DispatchCommand(input);
+                Console.WriteLine();
             }
         }
 
