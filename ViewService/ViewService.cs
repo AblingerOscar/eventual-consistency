@@ -32,7 +32,12 @@ namespace ViewService
             if (IsRunning)
             {
                 IsRunning = false;
+                viewUpdateTimer.Dispose();
+                viewUpdateTimer = null;
                 Connection.Close();
+
+                rpcServer.Dispose();
+                rpcServer = null;
             }
         }
 
