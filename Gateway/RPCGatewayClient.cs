@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ViewService
+namespace Gateway
 {
     public class RPCGatewayClient : IDisposable
     {
