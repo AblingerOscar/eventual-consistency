@@ -15,6 +15,8 @@ namespace ViewService
         private string FilePath;
         private ViewDataObject viewDO;
 
+        private bool viewsChanged = true;
+
         private RPCViewServiceServer rpcServer = null;
         private IConnection Connection { get; set; } = null;
         private IModel Channel { get; set; } = null;
@@ -65,15 +67,21 @@ namespace ViewService
                 rpcServer.Dispose();
                 rpcServer = null;
 
-                string json = viewDO.ToJson();
-                File.WriteAllText(FilePath, json);
+                PersistData();
             }            
+        }
+
+        private void PersistData()
+        {
+            string json = viewDO.ToJson();
+            File.WriteAllText(FilePath, json);
         }
 
         public void StartUp(string uid, string contextPath)
         {
             ServiceId = uid;
             IsRunning = true;
+            viewsChanged = true;
 
             FilePath = contextPath;
 
@@ -114,12 +122,26 @@ namespace ViewService
                 viewUpdateTimer.Dispose();
                 viewUpdateTimer = null;
             }
-            viewUpdateTimer = new Timer(BroadcastViewCount, null, 0, 5000);
+            viewUpdateTimer = new Timer(SaveAndBroadcastViews, null, 0, 5000);
         }
 
-        private void BroadcastViewCount(object args)
+        private void SaveAndBroadcastViews(object args)
         {
-            // TODO: only on changes
+            PersistData();
+            if (viewsChanged)
+                // no locking here, because race condition is not problematic (only update delay)
+            {
+                lock (addViewsLock)
+                {
+                    viewsChanged = false;
+                }
+
+                BroadcastViewCount();
+            }
+        }
+
+        private void BroadcastViewCount()
+        {
             Channel.BasicPublish("", "routing-key", null, Encoding.UTF8.GetBytes("test"));
             OnViewUpdate?.Invoke(this, new OnViewUpdateHandlerArgs(viewDO.OwnViews));
             OnLog?.Invoke(this, new OnLogHandlerArgs($"Sent {viewDO.OwnViews}", LogReason.DEBUG));
@@ -129,6 +151,7 @@ namespace ViewService
         {
             lock (addViewsLock)
             {
+                viewsChanged = true;
                 if (viewDO.Views.ContainsKey(ServiceId))
                 {
                     viewDO.Views[ServiceId]++;
