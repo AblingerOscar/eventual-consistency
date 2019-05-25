@@ -193,28 +193,47 @@ Unser Simulator trägt den Namen **Cheetah** (Gepard). Das ist auf die Tatsache 
 
 ### ViewService
 
-- Kernstück
-- Auflistung der Features
-
-### Utility-Klassen
+Das Kernstück des Projektes stellt der  View-Service dar. Das ist jener Service der mehrfach verteilt gestartet und angesprochen wird und lokale Daten mit den anderen View-Services synchronisiert.
 
 
 
-## Beispiel
+#### Interface
 
-- Schreibtischtest
-- Veranschaulichung
+```c#
+public interface IViewService
+{
+    void StartUp(string uid, string contextPath);
+    void ShutDown();
+    void Abort();
+    int GetViewCount();
+    void AddViews(int number = 1);
+    bool IsRunning();
+}
+```
 
 
 
-## Ausführung
+Außerdem beinhaltet die Implementierung eine einfache Persistierung, die alle wissenden Views von allen Services vorm Synchronisieren und beim Shutdown serialisiert in einer Datei ablegt. Beim Startup wird nachgeschaut, ob diese Datei existiert und gegebenenfalls mit diesem Zustand weitergemacht.
+
+Intern werden die Views in einem `ViewDataObject` gespeichert, das die eigenen Views und die Views von anderen synchronisierten Services mitspeichert. Hier kann dann die totale Anzahl der Views berechnet werden.
 
 
 
-- Screenshots von Cheetah
-- RabbitMQ-Managment Frontend
-- DB-Files
-- Terminal-Output
+#### Synchronisierung
+
+Die Synchronisierung zwischen den Services wird mit dem Publish/Subscribe-Pattern über *RabbitMQ* durchgeführt.
+
+Dabei erfolgt ein Update nach einem gewissen Intervall ausgelöst innerhalb des Services.
+
+Pro View-Service gibt es eine Queue und über einen `ChannelExchangeName` wird ein Fanout durchgeführt (*Publish*). Außerdem erfolgt ein *Subscribe* auf dem gleichen ExchangeName.
+
+
+
+Übertragen wird hier nur der eigene (sichere) View-Count, man könnte allerdings die Logik auch erweitern und aufgrund von anderen - möglicherweise ungültigen oder abgelaufenen - Daten synchronisieren. Dabei muss man aber sicherlich Timestamps,  etc. mitliefern, um die Richtigkeit zu maximieren. Unsere Lösung wird demnach immer etwas hinter den echten absoluten Werten nachhinken und erst konsistent werden, wenn die Anzahl der einkommenden Anfragen überschaubar sinkt. Sobald alle Services das nächste Mal ein Update ausgesendet haben, sollte jeder Service die richtigen absoluten Views liefern können.
+
+
+
+
 
 
 
