@@ -98,20 +98,98 @@ Wie man hier erkennen kann, wird eine Anfrage immer an genau ein vordefiniertes 
 
 ### Cheetah (Simulator)
 
-- Methoden
-- CLI Kommandos
-- Simulator und Verbindungsstück
+
+
+Der Simulator hat hier zwei besondere Aufgaben: Zum einen erstellt, stoppt und verwaltet er definierte Services und gibt Ihnen IDs. Zum anderen lässt er das manuelle und automatische Hinzufügen und simulieren von Client-Views zu.
+
+Das Ganze funktioniert über ein CLI, das all diese Möglichkeiten bietet.
+
+```bash
+> help
+help: Prints this help screen.
+        help <cmd> will only print the help screen for that command
+
+exit: Stops all applications and exits the CLI
+        Aliases: shutdown
+
+create: Creates a new service and a client for it
+        Option --start will also start them
+        Usage: create [--start]
+
+start: Start an already existing service and its client
+        Usage: start <serviceID>
+
+stop: Stops a service and his client
+        Usage: stop <serviceID>
+
+abort: Aborts a service without giving him a chance to persist etc.
+        Usage: abort <serviceID>
+
+send: Sends views to the service
+        Usage: send <serviceID> [<viewAmount>]
+
+periodic: Asks the client to start or stop sending periodic views to the service
+        Usage: periodic start <serviceID> <interval in milliseconds> [<viewAmount>]
+               periodic stop <serviceID>
+
+list: Lists all Services
+        Option --running will only list running services
+        Usage: list [--running]
+
+hide: Hides Logs of the given output level or reason
+        Usage: hide reason <reason>
+               hide level <level>
+
+show: Shows Logs of the given output level or reason again
+        Usage: show reason <reason>
+               show level <level>
+```
 
 
 
-### Client
+Wie man hier erkennen kann,  hat dieses CLI bereits den Bequemlichkeit-Status erreicht. Es bietet gute Erklärungen und liefert stets saubere Fehlermeldungen zurück.
 
-- Abstraktion von Gateway (sowohl Cheetah, als auch Gateway können diese Schnittstelle verwenden)
-- Pro ViewService automatisch ein Client
 
-### Gateway
 
-- Rest-Service, um Client-Anfragen zu testen
+![](doc/img/cheetah-01.gif)
+
+
+
+Beispiel eines Demo-Laufs:
+
+Services werden gestartet und periodisch simulierte Views werden abgegeben. Die Logging-Ausgaben können in verschiedenen Stufen angezeigt werden. Hier sieht man beispielsweise, welche Services wann synchronisieren und Synchronisierungen empfangen und welche Daten verschickt werden.
+
+```
+# create and start 3 services
+> create --start
+> create --start
+> create --start
+
+# define automated periodic client requests
+> periodic start 0 3000 5
+> periodic start 1 5000 2
+
+# stop service 2
+> stop 2
+
+# begin of gif
+> list
+> list --running
+
+> show reason DEBUG
+```
+
+
+
+![](doc/img/cheetah-02.gif)
+
+
+
+#### Namenserklärung
+
+Unser Simulator trägt den Namen **Cheetah** (Gepard). Das ist auf die Tatsache zurückzuführen, dass dieser eine Übersicht über alle verfügbaren Services erhält und Einsicht auf deren internen Berechnungen und Aufzeichnungen gewährt. Aus diesem Grund schummelt (Homophon: *Cheater*) er im Bezug auf tatsächliches Wissen in einer Applikation mit Eventual Consistency. Außerdem jagt und fordert er unsere Message Oriented Middleware *RabbitMQ*.
+
+
 
 ### ViewService
 
