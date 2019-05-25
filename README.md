@@ -20,8 +20,8 @@ Kommunikation zwischen den Services soll durch künstliche Komplikationen auf ih
 ### Eingesetzte Technologien
 
 - .NET Core 2.1
-- RabbitMQ
-- ASP.NET
+- [RabbitMQ](https://www.rabbitmq.com/)
+- [ASP.NET](https://dotnet.microsoft.com/apps/aspnet)
 - NuGet Package: RabbitMQ.Client 5.1.0
 
 ### Vorgehensweise
@@ -31,6 +31,15 @@ Im ersten Schritt berieten wir uns ausführlicher darüber, wie wir die Applikat
 Je weiter die Implementierung des Simulators fortgeschritten war, desto mehr wurde dieser in der Entwicklung  verwendet, vor allem weil er bessere Konsolen-Outputs liefert und schneller und angenehmer verwendet werden kann.
 
 Nachdem die Interfaces einigermaßen fixiert waren, konnte die Arbeit relativ getrennt aufgeteilt und am Ende die Applikation überraschend gut  zusammengeführt werden.
+
+## Getting started
+
+Um diese Anwendung zu starten, muss natürlich RabbitMQ und .NET Core installiert sein.
+Dann kann einfach das Skript `start.bat` ausgeführt werden.
+
+Dieses wird zwei Konsolenfenster öffnen: Eines in dem der ASP.NET server ([Gateway](#gateway)) gestarted wird
+(in diesem können alle REST abfragen eingesehen werden; größtenteils ist diese Ausgabe allerdings nicht besonders relevant),
+und ein zweites mit [Cheetah](#cheetah-simulator).
 
 ## Theorie
 
