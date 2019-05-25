@@ -29,6 +29,68 @@ Kommunikation zwischen den Services soll durch künstliche Komplikationen auf ih
 
 
 
+
+
+## Theorie
+
+- Eventual Consistency
+- Service-Syncronisation
+- Caching
+
+
+
+- Enventual Consistency darf keine Requests verlieren -> Advert-Money
+
+
+
+## Komponenten
+
+
+
+### Cheetah (Simulator)
+
+- Methoden
+- CLI Kommandos
+- Simulator und Verbindungsstück
+
+
+
+### Client
+
+- Abstraktion von Gateway (sowohl Cheetah, als auch Gateway können diese Schnittstelle verwenden)
+- Pro ViewService automatisch ein Client
+
+### Gateway
+
+- Rest-Service, um Client-Anfragen zu testen
+
+### ViewService
+
+- Kernstück
+- Auflistung der Features
+
+### Utility-Klassen
+
+
+
+## Beispiel
+
+- Schreibtischtest
+- Veranschaulichung
+
+
+
+## Ausführung
+
+
+
+- Screenshots von Cheetah
+- RabbitMQ-Managment Frontend
+- DB-Files
+- Terminal-Output
+
+
+
 ## Quellen
 
 - [Why Computers Can't Count Sometimes](https://www.youtube.com/watch?v=RY_2gElt3SA)
