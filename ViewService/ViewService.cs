@@ -195,7 +195,7 @@ namespace ViewService
             var body = new ViewCountSyncDataObject(ServiceId, viewDO.OwnViews).ToBytes();
 
             Channel.BasicPublish(
-                exchange: "view-count-syncs",
+                exchange: RabbitMQConfiguration.ChannelExchangeName,
                 routingKey: "",
                 basicProperties: null,
                 body: body
