@@ -125,10 +125,10 @@ namespace ViewService
             Channel = Connection.CreateModel();
             Channel.ExchangeDeclare(exchange: RabbitMQConfiguration.ChannelExchangeName, type: "fanout");
 
-            BindServiceConnsumer();
+            BindServiceConsumer();
         }
 
-        private void BindServiceConnsumer()
+        private void BindServiceConsumer()
         {
             var queueName = Channel.QueueDeclare().QueueName;
             Channel.QueueBind(
