@@ -63,6 +63,37 @@ Allerdings darf selbst bei diesen Applikationen keine Anfrage verloren gehen, we
 
 ## Komponenten
 
+### Gateway
+
+Das Gateway ist eine ASP.Net-Anwendung, die eine Rest-Schnittstelle zu den ViewServices darstellt. Hier können Views ausgelesen und neue hinzugefügt werden.
+
+Die Kommunikation mit den Services erfolgt über RabbitMQ mit dem Request/Reply-Pattern (Implementierung in `RPCGatewayClient`).
+
+
+
+Die definierten Routen sind folgende:
+
+- `GET api/{serviceUid}/views`
+- `POST api/{serviceUid}/add-view`
+- `POST api/{serviceUid}/add-views/{number}`
+
+Wie man hier erkennen kann, wird eine Anfrage immer an genau ein vordefiniertes  Service geschickt. In der Realität würde ein Load-Balancer eine Anfrage entgegennehmen und diese an einen Service weiterleiten (z.B.: an einen unausgelasteten oder jenen in der Nähe des Requests).
+
+
+
+#### Screenshots
+
+![](doc/img/gateway-01.png)
+
+![](doc/img/gateway-02.png)
+
+
+
+#### Herausforderungen
+
+- SSL-Konfiguration und Port-Blocking
+- Gemeinsames Starten von Simulator und ASP.NET
+
 
 
 ### Cheetah (Simulator)
