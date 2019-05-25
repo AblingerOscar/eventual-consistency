@@ -4,12 +4,13 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using SharedClasses;
 
 namespace ViewService
 {
     public class ViewService : ICheetahViewService
-    {
+    {   
         private string ServiceId { get; set; }
         private bool IsRunning { get; set; } = false;
         private string FilePath;
@@ -22,7 +23,6 @@ namespace ViewService
         private IModel Channel { get; set; } = null;
 
         private Timer viewUpdateTimer = null;
-
 
         private readonly static object addViewsLock = new object();
 
@@ -43,21 +43,6 @@ namespace ViewService
             }
         }
 
-        public int GetViewCount()
-        {
-            if (IsRunning)
-            {
-                lock (addViewsLock)
-                {
-                    return viewDO.TotalViews;
-                }
-            } else
-            {
-                throw new NotSetupException(
-                    "Tried to get view count on stopped service");
-            }
-        }
-
         public void ShutDown()
         {
             if (IsRunning)
@@ -71,7 +56,22 @@ namespace ViewService
                 rpcServer = null;
 
                 PersistData();
-            }            
+            }
+        }
+
+        public int GetViewCount()
+        {
+            if (IsRunning)
+            {
+                lock (addViewsLock)
+                {
+                    return viewDO.TotalViews;
+                }
+            } else
+            {
+                throw new NotSetupException(
+                    "Tried to get view count on stopped service");
+            }
         }
 
         private void PersistData()
@@ -96,6 +96,18 @@ namespace ViewService
                 viewDO = ViewDataObject.FromJson(json);
             }
 
+            // Communication between Gateway and ViewService
+            InitializeRPCServer();
+
+            // Communication and synchronization between ViewServices
+            InitializeServiceCommunication();
+
+            // Syncronization between ViewServices are triggered by timer interval
+            InitializeUpdateTimer();
+        }
+
+        private void InitializeRPCServer()
+        {
             rpcServer = new RPCViewServiceServer(
                 ServiceId,
                 (msg) => {
@@ -104,28 +116,64 @@ namespace ViewService
                 GetViewCount,
                 number => AddViews(number ?? 1)
             );
-
-            DeclareChannel();
-            InitializeViewCountUpdaterTimer();
         }
 
-        private void DeclareChannel()
+        private void InitializeServiceCommunication()
         {
-            var factory = new ConnectionFactory() { HostName = "localhost" };
+            var factory = new ConnectionFactory() { HostName = RabbitMQConfiguration.HostName };
             Connection = factory.CreateConnection();
-
             Channel = Connection.CreateModel();
-            Channel.QueueDeclare("service-queue", false, false, false, null);
+            Channel.ExchangeDeclare(exchange: RabbitMQConfiguration.ChannelExchangeName, type: "fanout");
+
+            BindServiceConnsumer();
         }
 
-        private void InitializeViewCountUpdaterTimer()
+        private void BindServiceConnsumer()
+        {
+            var queueName = Channel.QueueDeclare().QueueName;
+            Channel.QueueBind(
+                queue: queueName,
+                exchange: RabbitMQConfiguration.ChannelExchangeName,
+                routingKey: ""
+            );
+
+            var consumer = new EventingBasicConsumer(Channel);
+            consumer.Received += HandleSyncViews;
+
+            Channel.BasicConsume(
+                queue: queueName,
+                autoAck: true,
+                consumer: consumer
+            );
+        }
+
+        private void HandleSyncViews(object model, BasicDeliverEventArgs eventArgs)
+        {
+            var body = ViewCountSyncDataObject.FromBytes(eventArgs.Body);
+
+            if (body.SenderServiceId == ServiceId) { return; }
+            
+            lock (addViewsLock) {
+                if (viewDO.Views.ContainsKey(body.SenderServiceId))
+                {
+                    viewDO.Views[body.SenderServiceId] = body.Views;
+                } else
+                {
+                    viewDO.Views.Add(body.SenderServiceId, body.Views);
+                }
+            }
+
+            OnLog?.Invoke(this, new OnLogHandlerArgs($"Received {body.SenderServiceId}'s views ({body.Views})", LogReason.DEBUG));
+        }
+
+        private void InitializeUpdateTimer()
         {
             if (viewUpdateTimer != null)
             {
                 viewUpdateTimer.Dispose();
                 viewUpdateTimer = null;
             }
-            viewUpdateTimer = new Timer(SaveAndBroadcastViews, null, 0, 5000);
+            viewUpdateTimer = new Timer(SaveAndBroadcastViews, null, 0, RabbitMQConfiguration.SyncUpdateInterval);
         }
 
         private void SaveAndBroadcastViews(object args)
@@ -138,14 +186,21 @@ namespace ViewService
                 {
                     viewsChanged = false;
                 }
-
                 BroadcastViewCount();
             }
         }
 
         private void BroadcastViewCount()
         {
-            Channel.BasicPublish("", "routing-key", null, Encoding.UTF8.GetBytes("test"));
+            var body = new ViewCountSyncDataObject(ServiceId, viewDO.OwnViews).ToBytes();
+
+            Channel.BasicPublish(
+                exchange: "view-count-syncs",
+                routingKey: "",
+                basicProperties: null,
+                body: body
+            );
+
             OnViewUpdate?.Invoke(this, new OnViewUpdateHandlerArgs(viewDO.OwnViews));
             OnLog?.Invoke(this, new OnLogHandlerArgs($"Sent {viewDO.OwnViews}", LogReason.DEBUG));
         }
@@ -155,11 +210,25 @@ namespace ViewService
             lock (addViewsLock)
             {
                 viewsChanged = true;
-                if (viewDO.Views.ContainsKey(ServiceId))
-                {
-                    viewDO.Views[ServiceId]++;
-                }
                 viewDO.OwnViews += number;
+            }
+        }
+
+        private void AddViewsFromOther(string serviceId, int number = 1)
+        {
+            lock (addViewsLock)
+            {
+                if (ServiceId  == serviceId)
+                {
+                    viewsChanged = true;
+                    viewDO.OwnViews += number;
+                } else if (viewDO.Views.ContainsKey(serviceId))
+                {
+                    viewDO.Views[serviceId] += number;
+                } else
+                {
+                    viewDO.Views.Add(serviceId, number);
+                }
             }
         }
 
