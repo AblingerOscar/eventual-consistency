@@ -233,7 +233,27 @@ Pro View-Service gibt es eine Queue und über einen `ChannelExchangeName` wird e
 
 
 
+### Client
 
+Die Client-Implementierung dient hier als Abstraktion vom Gateway. Hier verwendet der Simulator den Client: jeweils ein View-Service und ein Client wird immer gemeinsam angelegt. Der Client macht dann HTTP-Requests auf das Gateway und kann so die Anzahl der Views von Services auslesen oder verändern.
+
+
+
+## Sonstiges
+
+### Webbasiertes Management-Interface für RabbitMQ:
+
+![](doc/img/rabbit-01.png)
+
+
+
+![](doc/img/rabbit-02.png)
+
+### Beispiel der persistierten Service-Files:
+
+```json
+{"OwnViews":8134,"Views":{"service-1":2392,"service-2":0}}
+```
 
 
 
