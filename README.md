@@ -4,15 +4,15 @@
 
 ### Kurzbeschreibung
 
-Es handelt sich um eine Deme einer AP-Datenverwaltung (im Sinne des [CAP Theorems](https://en.wikipedia.org/wiki/CAP_theorem)):
-Mehrere Clients generieren 'Views' (vergleiche Views mit YouTube oder Likes in Sozialen Medien) auf verschiedene Services. Diese liegen bewusst getrennt vor.
+Es handelt sich um eine Demo einer AP-Datenverwaltung (im Sinne des [CAP Theorems](https://en.wikipedia.org/wiki/CAP_theorem)):
+Mehrere Clients generieren 'Views' (vergleiche Views mit YouTube oder Likes in Sozialen Medien) auf verschiedene Services. Diese liegen bewusst getrennt vor, um eine skalierbarkeit der Applikation zu ermöglichen.
 Services sollen so miteinander kommunizieren, dass diese zumindest nach einer gewissen Zeit auf denselben Stand kommen.
 
 Siehe [Eventual Consistency](https://en.wikipedia.org/wiki/Eventual_consistency).
 
 ### Ziel/erwartetes Ergebnis
 
-Mindestens zwei Services, die miteinander kommunizieren und ihre Daten (asynchron) synchronisieren wollen.
+Implementierung von mindestens zwei Services, die miteinander kommunizieren und ihre Daten (asynchron) synchronisieren.
 Diese werden von einem eigenen Simulator verwaltet und bestimmt.
 
 Kommunikation zwischen den Services soll durch künstliche Komplikationen auf ihre Stabilität geprüft werden.
@@ -37,16 +37,16 @@ Nachdem die Interfaces einigermaßen fixiert waren, konnte die Arbeit relativ ge
 Um diese Anwendung zu starten, muss natürlich RabbitMQ und .NET Core installiert sein.
 Dann kann einfach das Skript `start.bat` ausgeführt werden.
 
-Dieses wird zwei Konsolenfenster öffnen: Eines in dem der ASP.NET server ([Gateway](#gateway)) gestarted wird
+Dieses wird zwei Konsolenfenster öffnen: Eines in dem der ASP.NET-Server ([Gateway](#gateway)) gestarted wird
 (in diesem können alle REST abfragen eingesehen werden; größtenteils ist diese Ausgabe allerdings nicht besonders relevant),
-und ein zweites mit [Cheetah](#cheetah-simulator).
+und ein zweites mit dem Simulator ([Cheetah](#cheetah-simulator)).
 
 ## Theorie
 
 Zahlen addieren sollte für einen Computer grundsätzlich kein Problem darstellen. Wenn das aber verteilt und skalierbar durchgeführt werden muss, kommt man auf einige interessante Probleme oder Nebeneffekte, die hier in kurz dargestellt werden:
 
 - Race conditions
-    - Zwei Clients können zu gleichen Zeit eine Abfrage von Daten machen. Durch die interne Request-Reihenfolge könnte ein Update am Server zwischen den Abfragen die Ergebnisse beeinflussen. Man kann kaum festlegen, welcher Client zuerst beliefert wird.
+    - Zwei Clients können zur gleichen Zeit eine Abfrage von Daten machen. Durch die interne Request-Reihenfolge könnte ein Update am Server zwischen den Abfragen die Ergebnisse beeinflussen. Man kann kaum festlegen, welcher Client zuerst beliefert wird.
     - Durch Balance-Loaders können Clients zu verschiedenen Servern (hier: Services) weitergeleitet werden, die unterschiedliche Ergebnisse liefern können.
 
 - Caching
@@ -58,15 +58,15 @@ In diesem Projekt behandeln wir vor allem Eventual Consistency, die anderen Them
 
 
 
-### AP - Verfügbarkeit und Partitionstoleranz 
+### AP - Verfügbarkeit und Partitionstoleranz
 
-Die Verfügbarkeit ist extrem hoch, ebenso Toleranz gegenüber dem Ausfall einzelner Server. Allerdings ist die Konsistenz nicht immer sofort gegeben: es kann durchaus eine längere Zeit dauern, bis alle Server Updates erhalten und damit von allen Clients gesehen wird. (Stichwort: horizontale Skalierunng)
+Die Verfügbarkeit ist extrem hoch, ebenso Toleranz gegenüber dem Ausfall einzelner Server. Allerdings ist die Konsistenz nicht immer sofort gegeben: es kann durchaus eine längere Zeit dauern, bis alle Server Updates erhalten und damit von allen Clients gesehen wird. (Stichwort: horizontale Skalierung)
 
 
 
-Beispiele für Web-Anwendungen, die nicht auf strenge Konsistenz angewiesen sind, wären Social-Media-Sites wie Twitter oder Facebook; wenn einzelne Nachrichten nicht bei allen Nutzern  gleichzeitig eintreffen, ist dadurch die prinzipielle Funktion des Dienstes nicht beeinträchtigt. 
+Beispiele für Web-Anwendungen, die nicht auf strenge Konsistenz angewiesen sind, wären Social-Media-Sites wie Twitter oder Facebook; wenn einzelne Nachrichten nicht bei allen Nutzern  gleichzeitig eintreffen, ist dadurch die prinzipielle Funktion des Dienstes nicht beeinträchtigt.
 
-Allerdings darf selbst bei diesen Applikationen keine Anfrage verloren gehen, wenn man beispielsweise and YouTube  denkt, wo Werbeeinnahmen aufgrund von der Anzahl ann Videoaufrufen generiert werden.
+Allerdings darf selbst bei diesen Applikationen keine Anfrage verloren gehen, wenn man beispielsweise and YouTube  denkt, wo Werbeeinnahmen aufgrund von der Anzahl an Videoaufrufen generiert werden.
 
 
 
@@ -74,7 +74,7 @@ Allerdings darf selbst bei diesen Applikationen keine Anfrage verloren gehen, we
 
 ### Gateway
 
-Das Gateway ist eine ASP.Net-Anwendung, die eine Rest-Schnittstelle zu den ViewServices darstellt. Hier können Views ausgelesen und neue hinzugefügt werden.
+Das Gateway ist eine ASP.Net-Anwendung, die eine Rest-Schnittstelle zu den View-Services darstellt. Hier können Views ausgelesen und neue hinzugefügt werden.
 
 Die Kommunikation mit den Services erfolgt über RabbitMQ mit dem Request/Reply-Pattern (Implementierung in `RPCGatewayClient`).
 
@@ -86,7 +86,7 @@ Die definierten Routen sind folgende:
 - `POST api/{serviceUid}/add-view`
 - `POST api/{serviceUid}/add-views/{number}`
 
-Wie man hier erkennen kann, wird eine Anfrage immer an genau ein vordefiniertes  Service geschickt. In der Realität würde ein Load-Balancer eine Anfrage entgegennehmen und diese an einen Service weiterleiten (z.B.: an einen unausgelasteten oder jenen in der Nähe des Requests).
+Wie man hier erkennen kann, wird eine Anfrage immer an genau ein vordefiniertes  Service geschickt. In der Realität würde ein Load-Balancer eine Anfrage entgegennehmen und diese an ein Service weiterleiten (z.B.: an ein unausgelastetes oder jenes in der Nähe des Requests).
 
 
 
@@ -109,7 +109,7 @@ Wie man hier erkennen kann, wird eine Anfrage immer an genau ein vordefiniertes 
 
 
 
-Der Simulator hat hier zwei besondere Aufgaben: Zum einen erstellt, stoppt und verwaltet er definierte Services und gibt Ihnen IDs. Zum anderen lässt er das manuelle und automatische Hinzufügen und simulieren von Client-Views zu.
+Der Simulator hat hier zwei besondere Aufgaben: Zum einen erstellt, stoppt und verwaltet er definierte Services und gibt Ihnen IDs. Zum anderen lässt er das manuelle und automatische Hinzufügen und Simulieren von Client-Views zu.
 
 Das Ganze funktioniert über ein CLI, das all diese Möglichkeiten bietet.
 
@@ -128,7 +128,7 @@ create: Creates a new service and a client for it
 start: Start an already existing service and its client
         Usage: start <serviceID>
 
-stop: Stops a service and his client
+stop: Stops a service and its client
         Usage: stop <serviceID>
 
 abort: Aborts a service without giving him a chance to persist etc.
@@ -202,7 +202,7 @@ Unser Simulator trägt den Namen **Cheetah** (Gepard). Das ist auf die Tatsache 
 
 ### ViewService
 
-Das Kernstück des Projektes stellt der  View-Service dar. Das ist jener Service der mehrfach verteilt gestartet und angesprochen wird und lokale Daten mit den anderen View-Services synchronisiert.
+Das Kernstück des Projektes stellt der  View-Service dar. Das ist jenes Service, das mehrfach verteilt gestartet und angesprochen wird und lokale Daten mit den anderen View-Services synchronisiert.
 
 
 
@@ -224,15 +224,14 @@ public interface IViewService
 
 Außerdem beinhaltet die Implementierung eine einfache Persistierung, die alle wissenden Views von allen Services vorm Synchronisieren und beim Shutdown serialisiert in einer Datei ablegt. Beim Startup wird nachgeschaut, ob diese Datei existiert und gegebenenfalls mit diesem Zustand weitergemacht.
 
-Intern werden die Views in einem `ViewDataObject` gespeichert, das die eigenen Views und die Views von anderen synchronisierten Services mitspeichert. Hier kann dann die totale Anzahl der Views berechnet werden.
+Intern werden die Views in einem `ViewDataObject` gespeichert, das die eigenen Views und die Views von anderen synchronisierten Services mitspeichert. Hier kann dann die absolute Anzahl der Views berechnet werden.
 
 
 
 #### Synchronisierung
 
 Die Synchronisierung zwischen den Services wird mit dem Publish/Subscribe-Pattern über *RabbitMQ* durchgeführt.
-
-Dabei erfolgt ein Update nach einem gewissen Intervall ausgelöst innerhalb des Services.
+Dabei erfolgt ein Update nach einem gewissen Intervall ausgelöst durch ein Service.
 
 Pro View-Service gibt es eine Queue und über einen `ChannelExchangeName` wird ein Fanout durchgeführt (*Publish*). Außerdem erfolgt ein *Subscribe* auf dem gleichen ExchangeName.
 
@@ -244,7 +243,7 @@ Pro View-Service gibt es eine Queue und über einen `ChannelExchangeName` wird e
 
 ### Client
 
-Die Client-Implementierung dient hier als Abstraktion vom Gateway. Hier verwendet der Simulator den Client: jeweils ein View-Service und ein Client wird immer gemeinsam angelegt. Der Client macht dann HTTP-Requests auf das Gateway und kann so die Anzahl der Views von Services auslesen oder verändern.
+Die Client-Implementierung dient als Abstraktion vom Gateway. Hier verwendet der Simulator den Client: jeweils ein View-Service und ein Client wird immer gemeinsam angelegt. Der Client macht dann HTTP-Requests auf das Gateway und kann so die Anzahl der Views von Services auslesen oder verändern.
 
 
 
@@ -261,7 +260,13 @@ Die Client-Implementierung dient hier als Abstraktion vom Gateway. Hier verwende
 ### Beispiel der persistierten Service-Files:
 
 ```json
-{"OwnViews":8134,"Views":{"service-1":2392,"service-2":0}}
+{
+    "OwnViews": 8134,
+    "Views": {
+        "service-1": 2392,
+        "service-2": 0
+    }
+}
 ```
 
 
