@@ -72,6 +72,10 @@ Allerdings darf selbst bei diesen Applikationen keine Anfrage verloren gehen, we
 
 ## Komponenten
 
+<p align="center">
+  <img src="doc/img/architecture.png">
+</p>
+
 ### Gateway
 
 Das Gateway ist eine ASP.Net-Anwendung, die eine Rest-Schnittstelle zu den View-Services darstellt. Hier können Views ausgelesen und neue hinzugefügt werden.
