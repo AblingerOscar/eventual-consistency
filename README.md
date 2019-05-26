@@ -92,11 +92,13 @@ Wie man hier erkennen kann, wird eine Anfrage immer an genau ein vordefiniertes 
 
 #### Screenshots
 
-![](doc/img/gateway-01.png)
+<p align="center">
+  <img src="doc/img/gateway-01.png">
+</p>
 
-![](doc/img/gateway-02.png)
-
-
+<p align="center">
+  <img src="doc/img/gateway-02.png">
+</p>
 
 #### Herausforderungen
 
@@ -159,8 +161,9 @@ show: Shows Logs of the given output level or reason again
 Wie man hier erkennen kann,  hat dieses CLI bereits den Bequemlichkeit-Status erreicht. Es bietet gute Erklärungen und liefert stets saubere Fehlermeldungen zurück.
 
 
-
-![](doc/img/cheetah-01.gif)
+<p align="center">
+  <img src="doc/img/cheetah-01.gif">
+</p>
 
 
 
@@ -188,9 +191,9 @@ Services werden gestartet und periodisch simulierte Views werden abgegeben. Die 
 > show reason DEBUG
 ```
 
-
-
-![](doc/img/cheetah-02.gif)
+<p align="center">
+  <img src="doc/img/cheetah-02.gif">
+</p>
 
 
 
@@ -251,11 +254,13 @@ Die Client-Implementierung dient als Abstraktion vom Gateway. Hier verwendet der
 
 ### Webbasiertes Management-Interface für RabbitMQ:
 
-![](doc/img/rabbit-01.png)
+<p align="center">
+  <img src="doc/img/rabbit-01.png">
+</p>
 
-
-
-![](doc/img/rabbit-02.png)
+<p align="center">
+  <img src="doc/img/rabbit-02.png">
+</p>
 
 ### Beispiel der persistierten Service-Files:
 
