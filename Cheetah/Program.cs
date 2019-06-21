@@ -1,5 +1,7 @@
 ﻿using Cheetah.CLI;
 using Cheetah.ServiceController;
+using Newtonsoft.Json;
+using SharedClasses.DataObjects.ChangeMetaData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -126,24 +128,6 @@ namespace Cheetah
                     "Usage: abort <serviceID>"
                 });
             cli.AddCommand(
-                "send",
-                SendCommand,
-                new string[] {
-                    "Sends views to the service",
-                    "Usage: send <serviceID> [<viewAmount>]"
-                }
-                );
-            cli.AddCommand(
-                "periodic",
-                PeriodicCommand,
-                new string[]
-                {
-                    "Asks the client to start or stop sending periodic views to the service",
-                    "Usage: periodic start <serviceID> <interval in milliseconds> [<viewAmount>]",
-                    "       periodic stop <serviceID>"
-                }
-                );
-            cli.AddCommand(
                 "list",
                 ListCommand,
                 new string[]
@@ -257,89 +241,6 @@ namespace Cheetah
             }
         }
 
-        private void SendCommand(Arguments args)
-        {
-            var si = ReadServiceInformation(args, "help send");
-            var amount = args.GetInt(2);
-            SendViewsToService(si, amount);
-        }
-
-        private void SendViewsToService(ServiceInformation si, int? amount)
-        {
-            if (!amount.HasValue)
-            {
-                Console.WriteLine("Amount of views invalid");
-                return;
-            }
-            SendViewsToService(si, amount.Value);
-        }
-
-        private void SendViewsToService(ServiceInformation si, int amount)
-        {
-            if (si != null)
-            {
-                serviceController.SendViews(si, amount);
-                Console.WriteLine($"Sent Views");
-            }
-        }
-
-        private void PeriodicCommand(Arguments args)
-        {
-            if (args.ArgumentList.Length < 2)
-            {
-                cli.DispatchCommand("help periodic");
-                return;
-            }
-            if (args.ArgumentList[1] == "start")
-                StartPeriodicCommand(args);
-            else if (args.ArgumentList[1] == "stop")
-                StopPeriodicCommand(args);
-        }
-
-        private void StartPeriodicCommand(Arguments args)
-        {
-            var si = ReadServiceInformation(args, "help periodic", 2);
-            var interval = args.GetInt(3);
-            var viewAmount = args.GetInt(4);
-            StartPeriodicSending(si, interval, viewAmount);
-        }
-
-        private void StartPeriodicSending(ServiceInformation si, int? interval, int? viewAmount)
-        {
-            if (si == null)
-                return;
-
-            if (!interval.HasValue)
-            {
-                Console.WriteLine("Could not read interval");
-                cli.DispatchCommand("help periodic");
-            }
-            int resolvedViewAmount = viewAmount.GetValueOrDefault(1);
-
-            StartPeriodicSending(si, interval.Value, resolvedViewAmount);
-        }
-
-        private void StartPeriodicSending(ServiceInformation si, int interval, int viewAmount)
-        {
-            serviceController.StartSendingRepeatedViewsToService(si, interval, viewAmount);
-            Console.WriteLine("Started periodic sendings");
-        }
-
-        private void StopPeriodicCommand(Arguments args)
-        {
-            var si = ReadServiceInformation(args, "help periodic", 2);
-            StopPeriodicSending(si);
-        }
-
-        private void StopPeriodicSending(ServiceInformation si)
-        {
-            if (si != null)
-            {
-                serviceController.StopSendingRepeatedViewsToService(si);
-                Console.WriteLine("Stopped periodic sendings");
-            }
-        }
-
         private void ListCommand(Arguments args)
         {
             IEnumerable<ServiceInformation> services;
@@ -407,11 +308,6 @@ namespace Cheetah
                 if (service.Service.IsRunning())
                 {
                     service.Service.ShutDown();
-                }
-
-                if (service.Client.IsSetup())
-                {
-                    service.Client.StopPeriodicRequests();
                 }
             }
         }

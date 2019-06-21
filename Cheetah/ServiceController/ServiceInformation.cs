@@ -1,5 +1,4 @@
 ﻿using ViewService;
-using Client;
 using System.Threading;
 using System;
 
@@ -8,15 +7,13 @@ namespace Cheetah.ServiceController
     internal class ServiceInformation
     {
         public int ID { get; }
-        internal ICheetahViewService Service;
-        internal IClient Client;
+        internal ICheetahSyncService Service;
         public bool IsRunning { get; internal set; }
 
-        public ServiceInformation(int ID, ICheetahViewService service, IClient client)
+        public ServiceInformation(int ID, ICheetahSyncService service)
         {
             this.ID = ID;
             Service = service;
-            Client = client;
             IsRunning = false;
         }
 
@@ -25,8 +22,8 @@ namespace Cheetah.ServiceController
             string msg = $"service id: {ID}\n" + $"is active: {IsRunning}";
             if (IsRunning)
             {
-                msg += $"\nEstimated view count: {Service.GetViewCount()}";
             }
+            throw new NotImplementedException();
             return msg;
         }
     }

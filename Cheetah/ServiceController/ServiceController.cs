@@ -1,5 +1,4 @@
-﻿using Client;
-using SharedClasses;
+﻿using SharedClasses;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,46 +31,12 @@ namespace Cheetah.ServiceController
 
         public ServiceInformation CreateNewService()
         {
-            ICheetahViewService service = new ViewService.ViewService();
-            IClient client = new Client.Client();
-
-            var si = new ServiceInformation(IDService.GenerateNextID(), service, client);
-
-            service.OnLog += (sender, args) =>
-            {
-                OnServiceLog?.Invoke(this, new OnServiceLogHandlerArgs(si, args));
-            };
-
-            services.Add(si);
-
-            return si;
-        }
-
-        public void SendViews(ServiceInformation si, int amount = 1)
-        {
-            si.Client.AddViews(amount);
-        }
-
-        public void StartSendingRepeatedViewsToService(ServiceInformation si, int interval, int amount = 1)
-        {
-            si.Client.StartPeriodicRequests(amount, interval);
+            throw new NotImplementedException();
         }
 
         public bool StartService(ServiceInformation si)
         {
-            if (si.IsRunning)
-                return true;
-
-            var serviceId = IDService.GetServiceUIDForId(si.ID);
-            si.Service.StartUp(serviceId, Path.Combine(PersistenceConfiguration.DBDirectory, serviceId));
-            si.Client.Setup(serviceId);
-            si.IsRunning = true;
-            return false;
-        }
-
-        public void StopSendingRepeatedViewsToService(ServiceInformation si)
-        {
-            si.Client.StopPeriodicRequests();
+            throw new NotImplementedException();
         }
 
         public void StopService(ServiceInformation si)

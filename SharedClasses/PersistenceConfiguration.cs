@@ -10,16 +10,20 @@ namespace SharedClasses
     {
         static PersistenceConfiguration() {
             var assemblyLocation = Assembly.GetExecutingAssembly().Location;
-            DBDirectory = Path.Combine(
+            var rootPath = Path.Combine(
                 Path.GetDirectoryName(assemblyLocation),
                 "..", // Debug
                 "..", // bin
                 "..", // Cheetah
-                "..", // root
-                "database");
+                "..");
+
+            DBDirectory = Path.Combine(rootPath, "database");
+            SyncDirectory = Path.Combine(rootPath, "syncDir");
+
             Directory.CreateDirectory(DBDirectory);
         }
 
         public static readonly string DBDirectory;
+        public static readonly string SyncDirectory;
     }
 }

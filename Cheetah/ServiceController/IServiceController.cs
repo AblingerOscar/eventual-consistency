@@ -40,24 +40,5 @@ namespace Cheetah.ServiceController
         /// </summary>
         /// <param name="si">The service information for the service to abort</param>
         void AbortService(ServiceInformation si);
-        /// <summary>
-        /// Sends views to a service
-        /// </summary>
-        /// <param name="si">The service information for the service to send the views to</param>
-        /// <param name="amount">The amount of views to send. Must be at least 1</param>
-        void SendViews(ServiceInformation si, int amount = 1);
-        /// <summary>
-        /// Asks the client to start sending views in regular intervals to the given service.
-        /// Replaces an old one, if one is already existing
-        /// </summary>
-        /// <param name="si">The service information for the service that the views should be sent to</param>
-        /// <param name="interval">The amount of milliseconds in between every sending of views</param>
-        /// <param name="amount">The amount of views sent after that interval</param>
-        void StartSendingRepeatedViewsToService(ServiceInformation si, int interval, int amount = 1);
-        /// <summary>
-        /// Asks the client to stop sending repeated views to its service
-        /// </summary>
-        /// <param name="si">The service information for the service that the task should be stopped</param>
-        void StopSendingRepeatedViewsToService(ServiceInformation si);
     }
 }
