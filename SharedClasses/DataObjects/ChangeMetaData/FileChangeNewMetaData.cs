@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SharedClasses.DataObjects.ChangeMetaData.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Text;
