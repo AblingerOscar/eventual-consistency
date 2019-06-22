@@ -7,7 +7,7 @@
 
     public enum LogReason
     {
-        DEBUG, VIEWINCREASE, ERROR
+        DEBUG, ERROR, STATUSCHANGE
     }
 
     public class OnLogHandlerArgs

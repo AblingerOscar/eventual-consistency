@@ -6,7 +6,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cheetah", "Cheetah\Cheetah.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedClasses", "SharedClasses\SharedClasses.csproj", "{595AE877-AB2D-4E6E-8039-19948BBE693D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ViewService", "ViewService\ViewService.csproj", "{0ECF8B2F-8D30-4DBD-8687-9BA40A666D21}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SyncService", "SyncService\SyncService.csproj", "{0ECF8B2F-8D30-4DBD-8687-9BA40A666D21}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
