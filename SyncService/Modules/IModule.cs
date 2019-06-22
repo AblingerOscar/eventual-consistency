@@ -2,7 +2,7 @@
 {
     public interface IModule
     {
-        bool IsActive();
+        bool IsActive { get; }
         void Activate();
         void Deactivate();
     }
