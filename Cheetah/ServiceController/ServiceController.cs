@@ -26,23 +26,35 @@ namespace Cheetah.ServiceController
         public void AbortService(ServiceInformation si)
         {
             si.Service.Abort();
-            si.IsRunning = false;
         }
 
         public ServiceInformation CreateNewService()
         {
-            throw new NotImplementedException();
+            var si = new ServiceInformation(
+                IDService.GenerateNextID(),
+                new SyncService.SyncService()
+                );
+            services.Add(si);
+
+            si.Service.OnLog += (source, args) => OnServiceLog?.Invoke(this, new OnServiceLogHandlerArgs(si, args));
+
+            return si;
         }
 
         public bool StartService(ServiceInformation si)
         {
-            throw new NotImplementedException();
+            var serviceId = IDService.GetServiceUIDForId(si.ID);
+            si.Service.StartUp(
+                serviceId,
+                Path.Combine(PersistenceConfiguration.SyncDirectory, serviceId),
+                Path.Combine(PersistenceConfiguration.DBDirectory, serviceId)
+                );
+            return true;
         }
 
         public void StopService(ServiceInformation si)
         {
             si.Service.ShutDown();
-            si.IsRunning = false;
         }
     }
 }
