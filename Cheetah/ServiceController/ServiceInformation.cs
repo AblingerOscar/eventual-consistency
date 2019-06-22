@@ -1,13 +1,13 @@
-﻿using SyncService;
-using System.Threading;
+﻿using System.Threading;
 using System;
+using SyncService;
 
 namespace Cheetah.ServiceController
 {
     internal class ServiceInformation
     {
         public int ID { get; }
-        internal ICheetahSyncService Service;
+        public ICheetahSyncService Service;
 
 
 
