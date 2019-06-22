@@ -1,4 +1,4 @@
-﻿using ViewService;
+﻿using SyncService;
 
 namespace Cheetah.ServiceController
 {

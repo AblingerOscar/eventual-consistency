@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ViewService
+namespace SyncService
 {
     public delegate void OnLogHandler(ICheetahSyncService sender, OnLogHandlerArgs args);
 

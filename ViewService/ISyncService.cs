@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ViewService
+namespace SyncService
 {
     public interface ISyncService
     {

@@ -1,4 +1,4 @@
-﻿namespace ViewService
+﻿namespace SyncService
 {
     public enum OutputLevel
     {

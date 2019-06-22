@@ -5,7 +5,7 @@ using SharedClasses.DataObjects.ChangeMetaData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ViewService;
+using SyncService;
 
 namespace Cheetah
 {
