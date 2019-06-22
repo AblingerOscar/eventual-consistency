@@ -8,13 +8,19 @@ namespace Cheetah.ServiceController
     {
         public int ID { get; }
         internal ICheetahSyncService Service;
-        public bool IsRunning { get; internal set; }
+
+
+
+        public bool IsRunning {
+            get {
+                return Service.IsRunning;
+            }
+        }
 
         public ServiceInformation(int ID, ICheetahSyncService service)
         {
             this.ID = ID;
             Service = service;
-            IsRunning = false;
         }
 
         public override string ToString()

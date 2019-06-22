@@ -27,6 +27,16 @@ namespace SyncService
         /// <summary>
         /// Returns whether the Service is running or stopped (not started, aborted, or shut down).
         /// </summary>
-        bool IsRunning();
+        bool IsRunning { get; }
+
+        /// <summary>
+        /// Unique identifier
+        /// </summary>
+        string UID { get; }
+
+        /// <summary>
+        /// Folder in which the synchronized files are saved
+        /// </summary>
+        string SyncPath { get; }
     }
 }

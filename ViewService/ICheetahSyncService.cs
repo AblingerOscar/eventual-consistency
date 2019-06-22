@@ -15,5 +15,10 @@ namespace SyncService
         /// Event when the ViewService wants to log something
         /// </summary>
         event OnLogHandler OnLog;
+
+        /// <summary>
+        /// THe folder in which the service saves its data
+        /// </summary>
+        string SavePath { get; }
     }
 }
