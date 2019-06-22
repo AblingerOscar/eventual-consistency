@@ -13,6 +13,8 @@ namespace SyncService
         public string SavePath { get; private set; }
         public string UID { get; private set; }
         public string SyncPath { get; private set; }
+        public DateTime LastDomesticChangeTime { get; private set; }
+        public IDictionary<string, DateTime> LastKnownChangeTime { get; private set; }
 
         private IList<IModule> modules;
 

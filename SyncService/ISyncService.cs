@@ -38,5 +38,15 @@ namespace SyncService
         /// Folder in which the synchronized files are saved
         /// </summary>
         string SyncPath { get; }
+
+        /// <summary>
+        /// The last time a domestic change happened
+        /// </summary>
+        DateTime LastDomesticChangeTime { get; }
+
+        /// <summary>
+        /// The last known change times for each other service
+        /// </summary>
+        IDictionary<string, DateTime> LastKnownChangeTime { get; }
     }
 }
