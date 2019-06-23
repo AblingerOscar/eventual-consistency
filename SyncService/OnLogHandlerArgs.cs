@@ -7,7 +7,8 @@
 
     public enum LogReason
     {
-        DEBUG, ERROR, STATUSCHANGE
+        DEBUG, ERROR, STATUSCHANGE,
+        RABBITMQ_COMMUNICATION
     }
 
     public class OnLogHandlerArgs
