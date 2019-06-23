@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using SyncService.Modules;
+using SyncService.Modules.Heartbeat;
 
 namespace SyncService
 {
@@ -20,7 +21,10 @@ namespace SyncService
 
         public SyncService()
         {
-            modules = new List<IModule>();
+            modules = new List<IModule>()
+            {
+                new HeartbeatModule(this)
+            };
         }
 
         public void Abort()
