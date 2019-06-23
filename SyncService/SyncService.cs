@@ -26,7 +26,7 @@ namespace SyncService
         public void Abort()
         {
             IsRunning = false;
-            // TODO: deactivate modules
+            DeactivateModules();
             OnLog?.Invoke(this, new OnLogHandlerArgs("Service Aborted", LogReason.STATUSCHANGE));
         }
 
@@ -34,7 +34,8 @@ namespace SyncService
         public void ShutDown()
         {
             IsRunning = false;
-            // TODO: save everything & deactivate modules
+            // TODO: save everything
+            DeactivateModules();
             OnLog?.Invoke(this, new OnLogHandlerArgs("Service Shut down", LogReason.STATUSCHANGE));
         }
 
@@ -44,6 +45,23 @@ namespace SyncService
             UID = uid;
             SyncPath = syncPath;
             SavePath = savePath;
+            ActivateModules();
+        }
+
+        private void ActivateModules()
+        {
+            foreach(var module in modules)
+            {
+                module.Activate();
+            }
+        }
+
+        private void DeactivateModules()
+        {
+            foreach(var module in modules)
+            {
+                module.Deactivate();
+            }
         }
     }
 }
