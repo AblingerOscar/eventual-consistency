@@ -78,7 +78,7 @@ namespace Cheetah.CLI
                 commands[cmdName].Action(new Arguments(input));
             } catch (Exception e)
             {
-                Console.WriteLine(e.StackTrace);
+                Console.WriteLine(e);
             }
         }
 
