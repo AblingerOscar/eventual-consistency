@@ -70,6 +70,7 @@ namespace SyncService
             SyncPath = syncPath;
             SavePath = savePath;
             ActivateModules();
+            (modules[0] as HeartbeatModule).SendHeartbeat();
         }
 
         private void ActivateModules()
