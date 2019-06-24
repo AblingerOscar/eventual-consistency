@@ -10,7 +10,7 @@ namespace SharedClasses.DataObjects.ChangeMetaData.Serialization
 {
     internal class ChangeConverter : JsonConverter
     {
-        private const string CHANGE_DO_NAMESPACE = "SharedClasses.DataObjects.FileChangeTypes";
+        private const string CHANGE_DO_NAMESPACE = nameof(SharedClasses) + "." + nameof(SharedClasses.DataObjects) + "." + nameof(SharedClasses.DataObjects.ChangeMetaData);
 
         private static readonly ISet<Type> knownChangeTypes;
         private static readonly IDictionary<FileChangeMetaData.ChangeType, Type> enumToType;
@@ -24,9 +24,9 @@ namespace SharedClasses.DataObjects.ChangeMetaData.Serialization
             enumToType = assembly
                 .GetTypes()
                 .Where(t => string.Equals(t.Namespace, CHANGE_DO_NAMESPACE, StringComparison.Ordinal))
-                .ToDictionary(t => t.GetCustomAttributes(typeof(FileChangeTypeAttribute), true).FirstOrDefault())
-                .Where(kvp => kvp.Key != default)
-                .ToDictionary(kvp => (kvp.Key as FileChangeTypeAttribute).ChangeType, kvp => kvp.Value);
+                .ToDictionary(t => t, t => t.GetCustomAttributes(typeof(FileChangeTypeAttribute), true).FirstOrDefault())
+                .Where(kvp => kvp.Value != default)
+                .ToDictionary(kvp => (kvp.Value as FileChangeTypeAttribute).ChangeType, kvp => kvp.Key);
 
             knownChangeTypes = enumToType.Values.ToHashSet();
         }
