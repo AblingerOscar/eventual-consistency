@@ -68,7 +68,7 @@ namespace SyncService.Modules.Heartbeat
 
         private void DeclareConnectionAndChannel()
         {
-            var factory = new ConnectionFactory() { HostName = ConnectionConfiguration.HOSTNAME };
+            var factory = new ConnectionFactory();
             receiveConnection = factory.CreateConnection();
             receiveChannel = receiveConnection.CreateModel();
         }
@@ -190,7 +190,7 @@ namespace SyncService.Modules.Heartbeat
 
         private void SendHeartbeatAnswer(HeartbeatAnswer heartbeatAnswer)
         {
-            var factory = new ConnectionFactory() { HostName = ConnectionConfiguration.HOSTNAME };
+            var factory = new ConnectionFactory();
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel())
             {
