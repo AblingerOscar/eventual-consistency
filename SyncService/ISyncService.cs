@@ -45,7 +45,7 @@ namespace SyncService
         DateTime LastDomesticChangeTime { get; }
 
         /// <summary>
-        /// The last known change times for each other service
+        /// The last known change times for each other service, not including its own
         /// </summary>
         IDictionary<string, DateTime> LastKnownChangeTime { get; }
     }
