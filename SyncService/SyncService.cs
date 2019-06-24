@@ -21,9 +21,29 @@ namespace SyncService
 
         public SyncService()
         {
-            modules = new List<IModule>()
+            modules = new List<IModule>();
+            SetUpHeartbeatModule();
+        }
+
+        private void SetUpHeartbeatModule()
+        {
+            var heartbeatModule = new HeartbeatModule(this);
+            modules.Add(heartbeatModule);
+
+            heartbeatModule.OnHeartbeatAnswerReceived += (sender, args) =>
             {
-                new HeartbeatModule(this)
+                OnLog?.Invoke(this, new OnLogHandlerArgs(
+                    "Heartbeat answer received from " + args.HeartbeatReq.SenderUID + " with " + args.HeartbeatReq.KnownChanges.Count + " known changes",
+                    LogReason.RABBITMQ_COMMUNICATION
+                    ));
+            };
+
+            heartbeatModule.OnOutdatedLocalChanges += (sender, args) =>
+            {
+                OnLog?.Invoke(this, new OnLogHandlerArgs(
+                    $"Found {args.OutdatedLocalChanges.Count} outdated local changes from: " +
+                        string.Join(", ", args.OutdatedLocalChanges),
+                    LogReason.RABBITMQ_COMMUNICATION));
             };
         }
 
