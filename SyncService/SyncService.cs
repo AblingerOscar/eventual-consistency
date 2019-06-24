@@ -69,6 +69,7 @@ namespace SyncService
             UID = uid;
             SyncPath = syncPath;
             SavePath = savePath;
+            LoadSavedData();
             ActivateModules();
             (modules[0] as HeartbeatModule).SendHeartbeat();
         }
@@ -79,6 +80,13 @@ namespace SyncService
             {
                 { UID, LastDomesticChangeTime }
             };
+        }
+
+        private void LoadSavedData()
+        {
+            // TODO: Actually deserialize data
+            LastDomesticChangeTime = DateTime.Now;
+            LastKnownChangeTime = new Dictionary<string, DateTime>();
         }
 
         private void ActivateModules()
