@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System;
 using SyncService;
+using System.Text;
 
 namespace Cheetah.ServiceController
 {
@@ -25,12 +26,17 @@ namespace Cheetah.ServiceController
 
         public override string ToString()
         {
-            string msg = $"service id: {ID}\n" + $"is active: {IsRunning}";
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Service id: {ID}\n" + $"is active: {IsRunning}");
             if (IsRunning)
             {
+                sb.AppendLine("\t- last domestic change time: {Service.LastDomesticChangeTime}");
+                foreach (var changeKvp in Service.LastKnownChangeTime)
+                {
+                    sb.AppendLine($"\t- {changeKvp.Key}: {changeKvp.Value}");
+                }
             }
-            throw new NotImplementedException();
-            return msg;
+            return sb.ToString();
         }
     }
 }
