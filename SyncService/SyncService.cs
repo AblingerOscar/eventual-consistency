@@ -73,6 +73,14 @@ namespace SyncService
             (modules[0] as HeartbeatModule).SendHeartbeat();
         }
 
+        private IDictionary<string, DateTime> GetKnownChanges()
+        {
+            return new Dictionary<string, DateTime>(LastKnownChangeTime)
+            {
+                { UID, LastDomesticChangeTime }
+            };
+        }
+
         private void ActivateModules()
         {
             foreach(var module in modules)

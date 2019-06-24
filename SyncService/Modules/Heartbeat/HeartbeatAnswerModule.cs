@@ -9,7 +9,7 @@ using System.Text;
 
 namespace SyncService.Modules.Heartbeat
 {
-    class HeartbeatAnswerModule : IModule
+    public class HeartbeatAnswerModule : RabbitMQNode, IModule
     {
         public delegate void ModuleOutdatedLocalChangesHandler(HeartbeatAnswerModule source, OutdatedLocalChangesArgs args);
         public event ModuleOutdatedLocalChangesHandler OnOutdatedLocalChanges;
@@ -20,13 +20,11 @@ namespace SyncService.Modules.Heartbeat
         public bool IsActive { get; private set; }
 
         private string serviceID;
-        private IConnection receiveConnection;
-        private IModel receiveChannel;
-        private string consumerTag;
         private Func<IDictionary<string, DateTime>> getKnownChanges;
 
 
-        public HeartbeatAnswerModule(Func<IDictionary<string, DateTime>> getKnownChanges)
+        public HeartbeatAnswerModule(Func<IDictionary<string, DateTime>> getKnownChanges) :
+            base(ConnectionConfiguration.HEARTBEAT_ANSWER_EXCHANGE_NAME, "fanout")
         {
             IsActive = false;
             this.getKnownChanges = getKnownChanges;
@@ -47,7 +45,7 @@ namespace SyncService.Modules.Heartbeat
         {
             this.serviceID = serviceId;
             IsActive = true;
-            StartListening();
+            StartListeningFanout();
         }
 
         public void Deactivate()
@@ -57,77 +55,14 @@ namespace SyncService.Modules.Heartbeat
             StopListening();
         }
 
-        #region Private Methods
-        #region StartListening
-        private void StartListening()
+        protected override void OnReceiveConsumer(object sender, BasicDeliverEventArgs ea)
         {
-            DeclareConnectionAndChannel();
-            DeclareExchange();
-            var queueName = DeclareQueue();
-            RegisterConsumer(queueName);
+            var heartbeatReq = HeartbeatRequest.FromBytes(ea.Body);
+            if (heartbeatReq.SenderUID == serviceID)
+                return;
+
+            OnHeartbeatAnswerReceived?.Invoke(this, new HeartbeatAnswerReceivedArgs(heartbeatReq));
         }
-
-        private void DeclareConnectionAndChannel()
-        {
-            var factory = new ConnectionFactory();
-            receiveConnection = factory.CreateConnection();
-            receiveChannel = receiveConnection.CreateModel();
-        }
-
-        private void DeclareExchange()
-        {
-            receiveChannel.ExchangeDeclare(
-                exchange: ConnectionConfiguration.HEARTBEAT_ANSWER_EXCHANGE_NAME,
-                type: "fanout"
-                );
-        }
-
-        private string DeclareQueue()
-        {
-            var queueName = receiveChannel.QueueDeclare().QueueName;
-            receiveChannel.QueueBind(
-                queue: queueName,
-                exchange: ConnectionConfiguration.HEARTBEAT_ANSWER_EXCHANGE_NAME,
-                routingKey: ""
-                );
-
-            return queueName;
-        }
-
-        private void RegisterConsumer(string queueName)
-        {
-            var consumer = new EventingBasicConsumer(receiveChannel);
-            consumer.Received += (sender, ea) =>
-            {
-                var heartbeatReq = HeartbeatRequest.FromBytes(ea.Body);
-                if (heartbeatReq.SenderUID == serviceID)
-                    return;
-
-                OnHeartbeatAnswerReceived?.Invoke(this, new HeartbeatAnswerReceivedArgs(heartbeatReq));
-            };
-;
-            consumerTag = receiveChannel.BasicConsume(queue: queueName, autoAck: true, consumer: consumer);
-        }
-        #endregion
-
-        #region StopListening
-        private void StopListening()
-        {
-            CancelConsumer();
-            DisposeConnectionAndChannel();
-        }
-
-        private void CancelConsumer()
-        {
-            receiveChannel.BasicCancel(consumerTag);
-        }
-
-        private void DisposeConnectionAndChannel()
-        {
-            receiveChannel.Dispose();
-            receiveConnection.Dispose();
-        }
-        #endregion
 
         #region AnswerHeartbeatRequest
         private void GetOutdatedChanges(IDictionary<string, DateTime> localChanges, IDictionary<string, DateTime> requestChanges, out List<string> outdatedLocalChanges, out List<string> outdatedRequestChanges)
@@ -186,24 +121,8 @@ namespace SyncService.Modules.Heartbeat
                 NewerChanges = newerChanges
             };
 
-            SendHeartbeatAnswer(answer);
+            SendBasicPublishFanout(answer.ToBytes());
         }
-
-        private void SendHeartbeatAnswer(HeartbeatAnswer heartbeatAnswer)
-        {
-            var factory = new ConnectionFactory();
-            using (var connection = factory.CreateConnection())
-            using (var channel = connection.CreateModel())
-            {
-                channel.BasicPublish(
-                    exchange: ConnectionConfiguration.HEARTBEAT_ANSWER_EXCHANGE_NAME,
-                    routingKey: "",
-                    basicProperties: null,
-                    body: heartbeatAnswer.ToBytes()
-                    );
-            }
-        }
-        #endregion
         #endregion
     }
 }
