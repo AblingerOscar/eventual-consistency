@@ -19,17 +19,16 @@ namespace SyncService.Modules.Heartbeat
 
         public bool IsActive { get; private set; }
 
-        private string serviceUID;
+        private string serviceID;
         private IConnection receiveConnection;
         private IModel receiveChannel;
         private string consumerTag;
         private Func<IDictionary<string, DateTime>> getKnownChanges;
 
 
-        public HeartbeatAnswerModule(string serviceUID, Func<IDictionary<string, DateTime>> getKnownChanges)
+        public HeartbeatAnswerModule(Func<IDictionary<string, DateTime>> getKnownChanges)
         {
             IsActive = false;
-            this.serviceUID = serviceUID;
             this.getKnownChanges = getKnownChanges;
         }
 
@@ -44,14 +43,16 @@ namespace SyncService.Modules.Heartbeat
             NotifyOfOutdatedRequestChanges(outdatedRequestChanges, localChanges);
         }
 
-        public void Activate()
+        public void Activate(string serviceId)
         {
+            this.serviceID = serviceId;
             IsActive = true;
             StartListening();
         }
 
         public void Deactivate()
         {
+            serviceID = null;
             IsActive = false;
             StopListening();
         }
@@ -99,7 +100,7 @@ namespace SyncService.Modules.Heartbeat
             consumer.Received += (sender, ea) =>
             {
                 var heartbeatReq = HeartbeatRequest.FromBytes(ea.Body);
-                if (heartbeatReq.SenderUID == serviceUID)
+                if (heartbeatReq.SenderUID == serviceID)
                     return;
 
                 OnHeartbeatAnswerReceived?.Invoke(this, new HeartbeatAnswerReceivedArgs(heartbeatReq));
@@ -181,7 +182,7 @@ namespace SyncService.Modules.Heartbeat
         {
             var answer = new HeartbeatAnswer()
             {
-                SenderUID = serviceUID,
+                SenderUID = serviceID,
                 NewerChanges = newerChanges
             };
 

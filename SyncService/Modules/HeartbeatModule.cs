@@ -14,29 +14,29 @@ namespace SyncService.Modules
         public bool IsActive { get; private set; }
         public event HeartbeatAnswerReceivedHandler OnHeartbeatAnswerReceived;
         public event OutdatedLocalChangesHandler OnOutdatedLocalChanges;
-        public ISyncService Service { get; }
 
+        private Func<IDictionary<string, DateTime>> getKnownChanges;
         private HeartbeatSignalModule signalModule;
         private HeartbeatAnswerModule answerModule;
 
-        public HeartbeatModule(ISyncService service)
+        public HeartbeatModule(Func<IDictionary<string, DateTime>> getKnownChanges)
         {
             IsActive = false;
-            Service = service;
+            this.getKnownChanges = getKnownChanges;
             AddHeartbeatAnswerModule();
             AddHeartbeatRequestModule();
         }
 
         private void AddHeartbeatAnswerModule()
         {
-            answerModule = new HeartbeatAnswerModule(Service.UID, GetKnownChanges);
+            answerModule = new HeartbeatAnswerModule(getKnownChanges);
             answerModule.OnOutdatedLocalChanges += OnOutdatedLocalChangesHandler;
             answerModule.OnHeartbeatAnswerReceived += OnHeartbeatAnswerReceivedHandler;
         }
 
         private void AddHeartbeatRequestModule()
         {
-            signalModule = new HeartbeatSignalModule(Service.UID, GetKnownChanges);
+            signalModule = new HeartbeatSignalModule(getKnownChanges);
             signalModule.OnHeartbeatSignalReceived += (source, args) =>
             {
                 answerModule.AnswerHeartbeatRequest(args.HeartbeatReq);
@@ -53,24 +53,16 @@ namespace SyncService.Modules
             OnOutdatedLocalChanges?.Invoke(this, args);
         }
 
-        private IDictionary<string, DateTime> GetKnownChanges()
-        {
-            return new Dictionary<string, DateTime>(Service.LastKnownChangeTime)
-            {
-                { Service.UID, Service.LastDomesticChangeTime }
-            };
-        }
-
         public void SendHeartbeat()
         {
             signalModule.SendHeartbeat();
         }
 
-        public void Activate()
+        public void Activate(string serviceId)
         {
             IsActive = true;
-            signalModule.Activate();
-            answerModule.Activate();
+            signalModule.Activate(serviceId);
+            answerModule.Activate(serviceId);
         }
 
         public void Deactivate()

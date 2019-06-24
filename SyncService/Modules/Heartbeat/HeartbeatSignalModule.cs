@@ -14,16 +14,15 @@ namespace SyncService.Modules.Heartbeat
         public delegate void HeartbeatSignalReceivedHandler(HeartbeatSignalModule source, HeartbeatSignalReceivedArgs args);
         public event HeartbeatSignalReceivedHandler OnHeartbeatSignalReceived;
 
-        private string serviceUID;
+        private string serviceId;
         private IConnection receiveConnection;
         private IModel receiveChannel;
         private string consumerTag;
         private Func<IDictionary<string, DateTime>> getKnownChanges;
 
-        public HeartbeatSignalModule(string serviceUID, Func<IDictionary<string, DateTime>> getKnownChanges)
+        public HeartbeatSignalModule(Func<IDictionary<string, DateTime>> getKnownChanges)
         {
             IsActive = false;
-            this.serviceUID = serviceUID;
             this.getKnownChanges = getKnownChanges;
         }
 
@@ -38,14 +37,16 @@ namespace SyncService.Modules.Heartbeat
             SendHeartbeatDO(heartbeatDO);
         }
 
-        public void Activate()
+        public void Activate(string serviceId)
         {
+            this.serviceId = serviceId;
             IsActive = true;
             StartListening();
         }
 
         public void Deactivate()
         {
+            serviceId = null;
             IsActive = false;
             StopListening();
         }
@@ -55,7 +56,7 @@ namespace SyncService.Modules.Heartbeat
         {
             return new HeartbeatRequest()
             {
-                SenderUID = serviceUID,
+                SenderUID = serviceId,
                 KnownChanges = getKnownChanges.Invoke()
             };
         }
@@ -117,7 +118,7 @@ namespace SyncService.Modules.Heartbeat
             consumer.Received += (sender, ea) =>
             {
                 var heartbeatReq = HeartbeatRequest.FromBytes(ea.Body);
-                if (heartbeatReq.SenderUID == serviceUID)
+                if (heartbeatReq.SenderUID == serviceId)
                     return;
 
                 OnHeartbeatSignalReceived?.Invoke(this, new HeartbeatSignalReceivedArgs(heartbeatReq));

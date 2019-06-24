@@ -3,7 +3,7 @@
     public interface IModule
     {
         bool IsActive { get; }
-        void Activate();
+        void Activate(string serviceId);
         void Deactivate();
     }
 }

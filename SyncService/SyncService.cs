@@ -27,7 +27,7 @@ namespace SyncService
 
         private void SetUpHeartbeatModule()
         {
-            var heartbeatModule = new HeartbeatModule(this);
+            var heartbeatModule = new HeartbeatModule(GetKnownChanges);
             modules.Add(heartbeatModule);
 
             heartbeatModule.OnHeartbeatAnswerReceived += (sender, args) =>
@@ -77,7 +77,7 @@ namespace SyncService
         {
             foreach(var module in modules)
             {
-                module.Activate();
+                module.Activate(UID);
             }
         }
 
