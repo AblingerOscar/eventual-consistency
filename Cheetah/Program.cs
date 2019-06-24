@@ -305,7 +305,7 @@ namespace Cheetah
             var services = serviceController.AllServices;
             foreach (var service in services)
             {
-                if (service.Service.IsRunning())
+                if (service.Service.IsRunning)
                 {
                     service.Service.ShutDown();
                 }
