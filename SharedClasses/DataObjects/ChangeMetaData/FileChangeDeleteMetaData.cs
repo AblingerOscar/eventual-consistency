@@ -13,10 +13,12 @@ namespace SharedClasses.DataObjects.ChangeMetaData
         public FileChangeDeleteMetaData() : base(ChangeType.DELETE)
         { }
 
-        public FileChangeDeleteMetaData(string fileName, string fileHash) : base(ChangeType.DELETE, fileName, fileHash)
+        public FileChangeDeleteMetaData(string fileName, string domesticServiceId, int patchId) :
+            base(ChangeType.DELETE, fileName, domesticServiceId, patchId)
         { }
 
-        public FileChangeDeleteMetaData(string fileName, string fileHash, DateTime timestamp) : base(ChangeType.NEW, fileName, fileHash, timestamp)
+        public FileChangeDeleteMetaData(string fileName, string domesticServiceId, int patchId, DateTime timestamp) :
+            base(ChangeType.NEW, fileName, domesticServiceId, patchId, timestamp)
         { }
     }
 }

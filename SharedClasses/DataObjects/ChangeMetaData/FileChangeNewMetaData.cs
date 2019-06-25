@@ -12,10 +12,12 @@ namespace SharedClasses.DataObjects.ChangeMetaData
         public FileChangeNewMetaData() : base(ChangeType.NEW)
         { }
 
-        public FileChangeNewMetaData(string fileName, string fileHash) : base(ChangeType.NEW, fileName, fileHash)
+        public FileChangeNewMetaData(string fileName, string domesticServiceId, int patchId) :
+            base(ChangeType.NEW, fileName, domesticServiceId, patchId)
         { }
 
-        public FileChangeNewMetaData(string fileName, string fileHash, DateTime timestamp) : base(ChangeType.NEW, fileName, fileHash, timestamp)
+        public FileChangeNewMetaData(string fileName, string domesticServiceId, int patchId, DateTime timestamp) :
+            base(ChangeType.NEW, fileName, domesticServiceId, patchId, timestamp)
         { }
     }
 }

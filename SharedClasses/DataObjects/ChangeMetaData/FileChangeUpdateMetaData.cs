@@ -9,28 +9,25 @@ namespace SharedClasses.DataObjects.ChangeMetaData
     [FileChangeType(ChangeType.UPDATE)]
     public class FileChangeUpdateMetaData : FileChangeMetaData
     {
-        public string OldFileHash;
 
         [JsonConstructor]
-        public FileChangeUpdateMetaData(string oldFileHash) : base(ChangeType.UPDATE)
+        public FileChangeUpdateMetaData() : base(ChangeType.UPDATE)
         {
-            OldFileHash = oldFileHash;
         }
 
-        public FileChangeUpdateMetaData(string fileName, string fileHash, string oldFileHash) : base(ChangeType.NEW, fileName, fileHash)
+        public FileChangeUpdateMetaData(string fileName, string domesticServiceId, int patchId) :
+            base(ChangeType.NEW, fileName, domesticServiceId, patchId)
         {
-            OldFileHash = oldFileHash;
         }
 
-        public FileChangeUpdateMetaData(string fileName, string fileHash, string oldFileHash, DateTime timestamp) : base(ChangeType.NEW, fileName, fileHash, timestamp)
+        public FileChangeUpdateMetaData(string fileName, string domesticServiceId, int patchId, DateTime timestamp) :
+            base(ChangeType.NEW, fileName, domesticServiceId, patchId, timestamp)
         {
-            OldFileHash = oldFileHash;
         }
 
         public override string ToString()
         {
-            return base.ToString() +
-                $"\tOld File Hash: {OldFileHash.ToString()}";
+            return base.ToString();
         }
     }
 

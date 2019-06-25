@@ -13,7 +13,8 @@ namespace SharedClasses.DataObjects.ChangeMetaData
 
         public ChangeType Type { get; }
         public string FileName;
-        public string FileHash;
+        public string DomesticServiceId;
+        public int PatchId;
         public DateTime TimeStamp = DateTime.Now;
 
         protected FileChangeMetaData(ChangeType type)
@@ -21,13 +22,14 @@ namespace SharedClasses.DataObjects.ChangeMetaData
             Type = type;
         }
 
-        public FileChangeMetaData(ChangeType type, string fileName, string fileHash) : this(type)
+        public FileChangeMetaData(ChangeType type, string fileName, string domesticServiceId, int patchId) : this(type)
         {
             FileName = fileName;
-            FileHash = fileHash;
+            PatchId = patchId;
         }
 
-        public FileChangeMetaData(ChangeType type, string fileName, string fileHash, DateTime timestamp) : this(type, fileName, fileHash) {
+        public FileChangeMetaData(ChangeType type, string fileName, string domesticServiceId, int patchId, DateTime timestamp) :
+            this(type, fileName, domesticServiceId, patchId) {
             TimeStamp = timestamp;
         } 
 
@@ -36,7 +38,8 @@ namespace SharedClasses.DataObjects.ChangeMetaData
             return $"FileChangeAbstractDO:" +
                 $"\ttype: {Type.ToString()}\n" +
                 $"\tfile name: {FileName}" +
-                $"\tfile hash: {FileHash}";
+                $"\tdomestic on service: {DomesticServiceId}" +
+                $"\tpatch id: {PatchId}";
         }
     }
 }
