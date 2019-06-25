@@ -124,7 +124,9 @@ namespace SyncService
         {
             fileManagerModule = new FileManagerModule(
                 SyncPath,
-                () => data.DomesticChanges.Max(md => md.PatchId),
+                () => data.DomesticChanges.Count > 0
+                    ? data.DomesticChanges.Max(md => md.PatchId)
+                    : 0,
                 GetSortedSavedChanges);
 
             fileManagerModule.OnConflictArises += (source, args) =>
