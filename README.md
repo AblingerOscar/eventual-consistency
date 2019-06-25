@@ -1,125 +1,224 @@
-# Eventual Consistency
+# Eventual Consistency für Datein ohne zentrale Datenbank
 
 ## Vordefinierte Ziele
 
 ### Kurzbeschreibung
 
-Es handelt sich um eine Demo einer AP-Datenverwaltung (im Sinne des [CAP Theorems](https://en.wikipedia.org/wiki/CAP_theorem)):
-Mehrere Clients generieren 'Views' (vergleiche Views mit YouTube oder Likes in Sozialen Medien) auf verschiedene Services. Diese liegen bewusst getrennt vor, um eine skalierbarkeit der Applikation zu ermöglichen.
-Services sollen so miteinander kommunizieren, dass diese zumindest nach einer gewissen Zeit auf denselben Stand kommen.
+Für die letzte Aufgabe, haben Mysliwietz Florian und ich ein System
+entwickelt, in dem beliebig viele Services miteinander kommunizieren
+und einen Integer-Wert synchronisieren.
+In diesem Projekt wird das nun ausgebaut und es werden Dateien
+synchronisiert.
+
+Das Projekt ist eine Demo einer AP-Datenverwaltung
+(im Sinne des [CAP Theorems](https://en.wikipedia.org/wiki/CAP_theorem)):
+Es gibt allerdings auch keine zentrale Datenbank.
+Stattdessen speichert jeder Service seine eigene Daten und all jene,
+von denen er weiß, dass es andere Services haben.
+Diese Informationen werden regelmäßig zwischen allen aktiven Services
+ausgetauscht.
 
 Siehe [Eventual Consistency](https://en.wikipedia.org/wiki/Eventual_consistency).
 
 ### Ziel/erwartetes Ergebnis
 
-Implementierung von mindestens zwei Services, die miteinander kommunizieren und ihre Daten (asynchron) synchronisieren.
-Diese werden von einem eigenen Simulator verwaltet und bestimmt.
-
-Kommunikation zwischen den Services soll durch künstliche Komplikationen auf ihre Stabilität geprüft werden.
+Man soll auf zwei Services Dateien hochladen können und nach einer
+gewissen Zeit, sollen beide Dateien auf beiden Services zur Verfügung
+stehen.
+Dasselbe soll gelten für Löschen und Ändern von Dateien.
+Das Zusammenführen von verschiedenen Änderungen wird allerdings nicht
+behandelt.
+Stattdessen wird immer der neuste Inhalt verwendet.
 
 ### Eingesetzte Technologien
 
 - .NET Core 2.1
 - [RabbitMQ](https://www.rabbitmq.com/)
-- [ASP.NET](https://dotnet.microsoft.com/apps/aspnet)
 - NuGet Package: RabbitMQ.Client 5.1.0
-
-### Vorgehensweise
-
-Im ersten Schritt berieten wir uns ausführlicher darüber, wie wir die Applikation aufbauen wollen. Das Architektur-Design der einzelnen Komponenten wurde mehrmals überarbeitet,  um verschiedene Aspekte des Prinzips anwenden zu können. Schwierig war dabei die Entscheidung, wie viel wir über einen Rest-Client steuern möchten und wie viel über einen dezidierten Simulator laufen soll. Am Ende war das ASP.NET-Rest-Modul zuerst funktionierend, weshalb erste Tests hier durchgeführt wurden.
-
-Je weiter die Implementierung des Simulators fortgeschritten war, desto mehr wurde dieser in der Entwicklung  verwendet, vor allem weil er bessere Konsolen-Outputs liefert und schneller und angenehmer verwendet werden kann.
-
-Nachdem die Interfaces einigermaßen fixiert waren, konnte die Arbeit relativ getrennt aufgeteilt und am Ende die Applikation überraschend gut  zusammengeführt werden.
 
 ## Getting started
 
-Um diese Anwendung zu starten, muss natürlich RabbitMQ und .NET Core installiert sein.
-Dann kann einfach das Skript `start.bat` ausgeführt werden.
+Um diese Anwendung zu starten, muss natürlich zuerst 
+[RabbitMQ](https://www.rabbitmq.com/download.html) installiert werden.
+Dann kann einfach das Skript `start.bat` ausgeführt werden, welches
+den ([Cheetah](#cheetah-simulator)) ausführt.
 
-Dieses wird zwei Konsolenfenster öffnen: Eines in dem der ASP.NET-Server ([Gateway](#gateway)) gestarted wird
-(in diesem können alle REST abfragen eingesehen werden; größtenteils ist diese Ausgabe allerdings nicht besonders relevant),
-und ein zweites mit dem Simulator ([Cheetah](#cheetah-simulator)).
+In dieser Konsolenanwendung sollte die Bedienung sehr gut erklärt sein.
+Um informationen über die verschiedenen Befehle zu erhalten, kann
+einfach das Kommando `help` ausgeführt werden.
+Genauere Details werden in dem Kapitel
+[Cheetah (Simulator)](#cheetah-simulator) genauer behandelt.
 
 ## Theorie
 
-Zahlen addieren sollte für einen Computer grundsätzlich kein Problem darstellen. Wenn das aber verteilt und skalierbar durchgeführt werden muss, kommt man auf einige interessante Probleme oder Nebeneffekte, die hier in kurz dargestellt werden:
+### Anwendungsfall
 
-- Race conditions
-    - Zwei Clients können zur gleichen Zeit eine Abfrage von Daten machen. Durch die interne Request-Reihenfolge könnte ein Update am Server zwischen den Abfragen die Ergebnisse beeinflussen. Man kann kaum festlegen, welcher Client zuerst beliefert wird.
-    - Durch Balance-Loaders können Clients zu verschiedenen Servern (hier: Services) weitergeleitet werden, die unterschiedliche Ergebnisse liefern können.
+Der Anwendungsfall, den diese Simulation nachahmen will, ist der
+folgende:
+Es gibt in einem Netzwerk meherere Computer.
+Diese sind nicht zwingend immer an.
+Allerdings soll trotzdem ein Ordner mit Dateien synchronisiert
+werden, ohne, dass dafür ein zentraler Server notwendig ist.
 
-- Caching
-    - Wenn es mehrere Caching-Instanzen gibt, können Clients verschiedene Ergebnisse bekommen, je nachdem, wo sie hingeleitet werden.
-- Eventual  Consistency
-    - Man nimmt in Kauf, dass Server nicht immer absolut aktuelle Daten liefern. Sie sollen in einem Moment mit einer Abweichung stimmen und erst nach einer gewissen Zeitspanne zum korrekten Ergebnis kommen.
+Das ist zum Beispiel praktisch, wenn man als Privatperson mehrere
+Computer besitzt, allerdings keinen Server betreiben will.
+Es gibt dafür auch bereits eine sehr beliebte und gut funktioniernde
+OpenSource Anwendung: [Syncthing](https://syncthing.net/)
+Natürlich muss dennoch irgendein Netzwerk bestehen, in dem diese
+Computer kommunizieren können.
+Für Syncthing ist das ein LAN, für diese Simulation ist das
+RabbitMQ.
 
-In diesem Projekt behandeln wir vor allem Eventual Consistency, die anderen Themen spielen aber trotzdem eine Rolle.
-
-
+Diese Simulation ist daher nur zur Erforschung dieses Konzeptes gedacht.
 
 ### AP - Verfügbarkeit und Partitionstoleranz
 
-Die Verfügbarkeit ist extrem hoch, ebenso Toleranz gegenüber dem Ausfall einzelner Server. Allerdings ist die Konsistenz nicht immer sofort gegeben: es kann durchaus eine längere Zeit dauern, bis alle Server Updates erhalten und damit von allen Clients gesehen wird. (Stichwort: horizontale Skalierung)
+Wie zuvor angesprochen handelt es sich bei dieser Simulation
+um eine AP-Datenverwaltung.
+Die hohe Verfügbarkeit wird dadurch gewährleistet, dass jeder Service
+eine Kopie der Änderungen besitzt.
+Die Partitionstoleranz entsteht dadurch, dass beliebig viele Services
+gleichzeitig laufen können und während der Laufzeit beliebig
+gestarted und gestoppt werden können.
 
+### Ablauf der Datensynchronisation
 
+Die Datenübertragung geschieht über 3 Schritte:
 
-Beispiele für Web-Anwendungen, die nicht auf strenge Konsistenz angewiesen sind, wären Social-Media-Sites wie Twitter oder Facebook; wenn einzelne Nachrichten nicht bei allen Nutzern  gleichzeitig eintreffen, ist dadurch die prinzipielle Funktion des Dienstes nicht beeinträchtigt.
+- Heartbeat
+- Metadatenübertragung
+- Dateiübertragung
 
-Allerdings darf selbst bei diesen Applikationen keine Anfrage verloren gehen, wenn man beispielsweise and YouTube  denkt, wo Werbeeinnahmen aufgrund von der Anzahl an Videoaufrufen generiert werden.
+Im Heartbeat wird zuerst kommuniziert, welche Services existieren und
+was deren Stand ist.
+Dieser Heartbeat ist immer ein broadcast.
 
+Nach dem heartbeat überprüft dann jeder Server, ob er einen veralteten
+Stand hat.
+Wenn ja, fragt er bei den anderen Services direkt an, um sie um deren
+Metadaten zu bitten.
+Diese werden nun direkt von Service zu Service ausgetauscht.
+Sollte ein Service nach dem Heartbeat heruntergefahren werden, so ist
+das den anderen Services dennoch egal – die Änderungen auf diesem
+Server werden halt nicht synchronisiert.
 
+Zum Schluss werden dann, je nach den Änderungen, auch die eigentlichen
+Dateien ausgetauscht.
+Das sollte über FTP funktionieren.
+Da dieses allerdings schwer in einer automatischen Art aufzusetzen war,
+wird dieser Teil ebenfalls nur simuliert, in dem einfach direkt auf das
+Dateisystem zugegriffen wird.
+
+Im folgenden wird dieser gesamte Ablauf anhand einem Beispiel mit
+drei Services durchgegangen.
+
+#### Beispielhafter Ablauf
+
+In diesem Beispiel gibt es die drei Services `S1`, `S2` und `S3`,
+sowie den RabbitMQ-Broker.
+Natürlich haben alle Services ihre eigenen Queues, um sich auf die
+Exchanges zu binden.
+
+<p align="center">
+  <img alt="Heartbeat start" src="doc/img/heartbeat_start.svg">
+</p>
+
+Nun möchte `S1` die Änderungen abfragen.
+Dafür sendet es zuerst das Heartbeat Signal.
+In diesem Signal sendet es auch die neusten Zeitstempel mit, die es
+von jedem Service hat.
+
+<p align="center">
+  <img alt="Heartbeat signal" src="doc/img/heartbeat_signal.svg">
+</p>
+
+Danach antwortet jeder Service wieder mit einem broadcast.
+Dieser beinhaltet alle Zeitstempel von Änderungen, die jünger sind
+als die, die im ursprünglichen Signal mitgeschickt wurden.
+
+<p align="center">
+  <img alt="Heartbeat answer" src="doc/img/heartbeat_answer.svg">
+</p>
+
+Dadurch weiß nun jeder Service, ob er gewisse Änderungen noch nicht
+hat.
+In diesem Fall hat `S2` noch Änderungen noch nicht, die `S1` und `S3`
+bereits haben.
+Zusätzlich hat `S1` auch Änderungen noch nicht, die `S3` bereits hat.
+
+Nun werden direkte Anfragen nach den Metadaten abgeschickt.
+
+<p align="center">
+  <img alt="Metadata requests" src="doc/img/metadata_request.svg">
+</p>
+
+Jeder Service antworted nun auf diese Requests mit den ihm zur Verfügung
+stehenden Metadaten.
+
+<p align="center">
+  <img alt="Metadata answers" src="doc/img/metadata_answer.svg">
+</p>
+
+Sollte in diesem Schritt zum Beispiel `S3` nicht mehr antworten, dann
+wird `S2` dennoch seine Daten mit dem Stand von `S1` auffrischen, auch,
+obwohl dieser nicht mehr aktuell ist (sondern nur `S3` den aktuellsten
+gehabt hat).
 
 ## Komponenten
 
-<p align="center">
-  <img src="doc/img/architecture.png">
-</p>
+### SyncService
 
-### Gateway
-
-Das Gateway ist eine ASP.Net-Anwendung, die eine Rest-Schnittstelle zu den View-Services darstellt. Hier können Views ausgelesen und neue hinzugefügt werden.
-
-Die Kommunikation mit den Services erfolgt über RabbitMQ mit dem Request/Reply-Pattern (Implementierung in `RPCGatewayClient`).
-
-
-
-Die definierten Routen sind folgende:
-
-- `GET api/{serviceUid}/views`
-- `POST api/{serviceUid}/add-view`
-- `POST api/{serviceUid}/add-views/{number}`
-
-Wie man hier erkennen kann, wird eine Anfrage immer an genau ein vordefiniertes  Service geschickt. In der Realität würde ein Load-Balancer eine Anfrage entgegennehmen und diese an ein Service weiterleiten (z.B.: an ein unausgelastetes oder jenes in der Nähe des Requests).
-
-
-
-#### Screenshots
+In dem Projekt `SyncService` gibt es eine gleichnamige Klasse, die den
+Service darstellt.
+Da die Aufgaben von diesem Service allerdings sehr vielzählig sind, wurde
+jede Aufgabe noch einmal abstrahiert.
+Diese Teile wurden Module genannt.
 
 <p align="center">
-  <img src="doc/img/gateway-01.png">
+  <img alt="SyncService Komponenten" src="doc/img/service_components.svg">
 </p>
 
-<p align="center">
-  <img src="doc/img/gateway-02.png">
-</p>
+Die Verschiedenen Module können auch untermodule haben:
 
-#### Herausforderungen
+- `HeartbeatModule`: Verschickt und empfängt Heartbeat Signale
+  und Antworten
+  - `HeartbeatSignalModule`: Verschickt und empfängt Heartbeat
+    Signale.
+  - `HeartbeatAnswerModule`: Verschickt und empfängt Heartbeat
+    Anworten
+- `MetaDataShareModule`: Verschickt um empfängt Metadaten Anfragen
+  und Antworten.
+  - `MetaDataRequestModule`: Verschickt um empfängt Metadaten Anfragen
+  - `MetaDataAnswerModule`: Verschickt um empfängt Metadaten Antworten
+- `FileManagerModule`: Wendet die Änderungen an. Dazu gehört auch
+  das Anfragen an die vollständigen Dateiinhalte.
+- `UpdaterModule`: Damit nicht immer sofort Heartbeats geschickt
+  werden, debounced dieses Module die Methode zum Senden davon.
 
-- SSL-Konfiguration und Port-Blocking
-- Gemeinsames Starten von Simulator und ASP.NET
+`RabbitMQNode` ist eine abstracte Klasse, die die Kommunikation
+über RabbitMQ erleichtert.
 
+Generell funktioniert die Kommunikation vom Service zu den Modulen
+nur über Aufruf derer Methoden, und durch das mitgeben von Methoden
+an übergeordnete Funktionen.
+Die Module kommunizieren mit hingegen nur mittels Events hinauf.
 
+Der `SyncService` initialisiert und verwendet dann nur mehr lediglich
+diese Module.
+Weiters kümmert es sich auch selber um die Persistierung der Metadaten.
 
 ### Cheetah (Simulator)
 
+Der Cheetah hat zwei besondere Aufgaben: Zum einen erstellt,
+stoppt und verwaltet er die Services und gibt ihnen die IDs und
+die Ordnerpfade, in denen sie operieren dürfen.
+Zum anderen lässt er den Benutzer über ein CLI die einzelnen
+Services manipulieren und zeigt deren Logs an.
 
+Die Befehle, die unterstützt werden, können mit dem `help`-Befehl
+aufgelistet werden:
 
-Der Simulator hat hier zwei besondere Aufgaben: Zum einen erstellt, stoppt und verwaltet er definierte Services und gibt Ihnen IDs. Zum anderen lässt er das manuelle und automatische Hinzufügen und Simulieren von Client-Views zu.
-
-Das Ganze funktioniert über ein CLI, das all diese Möglichkeiten bietet.
-
-```bash
+```sh
 > help
 help: Prints this help screen.
         help <cmd> will only print the help screen for that command
@@ -127,29 +226,33 @@ help: Prints this help screen.
 exit: Stops all applications and exits the CLI
         Aliases: shutdown
 
-create: Creates a new service and a client for it
+create: Creates a new service
         Option --start will also start them
         Usage: create [--start]
 
 start: Start an already existing service and its client
         Usage: start <serviceID>
 
-stop: Stops a service and its client
+stop: Stops a service and his client
         Usage: stop <serviceID>
 
 abort: Aborts a service without giving him a chance to persist etc.
         Usage: abort <serviceID>
 
-send: Sends views to the service
-        Usage: send <serviceID> [<viewAmount>]
-
-periodic: Asks the client to start or stop sending periodic views to the service
-        Usage: periodic start <serviceID> <interval in milliseconds> [<viewAmount>]
-               periodic stop <serviceID>
-
 list: Lists all Services
         Option --running will only list running services
         Usage: list [--running]
+
+upload: Uploads a local file to a service.
+        The local file path originates from 'exampleFiles/'
+        Usage: upload <serviceID> <name to upload as> <local file path>
+
+update: Updates a file from a service with the contents of an local file.
+        The local file path originates from 'exampleFiles/'
+        Usage: update <serviceID> <name to upload as> <local file path>
+
+delete: Deletes a file from a service
+        Usage: delete <serviceID> <fileName>
 
 hide: Hides Logs of the given output level or reason
         Usage: hide reason <reason>
@@ -160,127 +263,79 @@ show: Shows Logs of the given output level or reason again
                show level <level>
 ```
 
+### Namenserklärung
 
+Unser Simulator trägt den Namen **Cheetah** (Gepard).
+Das ist auf die Tatsache zurückzuführen, dass dieser eine Übersicht
+über alle verfügbaren Services erhält und Einsicht auf deren internen
+Berechnungen und Aufzeichnungen gewährt.
+Aus diesem Grund schummelt (Homophon: *Cheater*) er im Bezug auf
+tatsächliches Wissen in einer verteilten Applikation.
+Außerdem jagt und fordert er unsere Message Oriented Middleware *RabbitMQ*.
 
-Wie man hier erkennen kann,  hat dieses CLI bereits den Bequemlichkeit-Status erreicht. Es bietet gute Erklärungen und liefert stets saubere Fehlermeldungen zurück.
+### Beispiel Demo-Lauf
 
+Dieser Demo-Lauf geht von einem blanken Zustand aus
+(d.h. die Ordner `database` und `syncDir` sind gelöscht worden).
+Das ist der Fall, wenn die Daten direkt aus dem Repository geklont
+wurden.
 
-<p align="center">
-  <img src="doc/img/cheetah-01.gif">
-</p>
+Zuerst werden zwei Services erstellt.
+Diese erhalten automatisch die IDs 0 und 1.
+Auf diese werden nun auch zwei Dateien hochgeladen:
 
+- `hello.txt` auf Service 0 und
+- `fib.fs` aus der Datei `fibonacci.fs` auf Service 1.
 
+> Der Service 0 wurde gestoppt bevor der Service 1 gestartet wurde.
+> Das wurde daher gemacht, da Services beim Starten sofort eine
+> Heartbeat-Signal schicken und sich daher sofort synchronisiert
+> hätten.
 
-Beispiel eines Demo-Laufs:
-
-Services werden gestartet und periodisch simulierte Views werden abgegeben. Die Logging-Ausgaben können in verschiedenen Stufen angezeigt werden. Hier sieht man beispielsweise, welche Services wann synchronisieren und Synchronisierungen empfangen und welche Daten verschickt werden.
-
-```
-# create and start 3 services
+```sh
 > create --start
+> upload 0 hello.txt hello.txt
+> stop 0
 > create --start
+> upload 1 fib.fs fibonacci.fs
+```
+
+<p align="center">
+  <img alt="Demo Unsynchronisiert" src="doc/img/demo_setup.jpg">
+</p>
+
+Wenn nun der Service 0 wieder gestartet wird, wird dieser sofort
+ein Heartbeat-Signal aussenden und sich sofort auf den neusten
+Stand bringen.
+Service 1 hingegen erfährt auch, dass er nicht alle aktuellen Daten
+hat, und wird sich nach ca. 10 Sekunden ebenfalls synchronisieren.
+
+```sh
+> start 0
+```
+
+<p align="center">
+  <img alt="Demo Synchronisiert" src="doc/img/demo_synchronized.jpg">
+</p>
+
+Wenn nun die Applikation wieder verlassen (am Besten mit dem Befehl
+`exit`), und danach neu gestartet wird, dann haben beide Services
+wieder ihren alten Stand.
+(Sie müssen dennoch der Reihe nach mit `create` erstellt werden)
+
+```sh
 > create --start
-
-# define automated periodic client requests
-> periodic start 0 3000 5
-> periodic start 1 5000 2
-
-# stop service 2
-> stop 2
-
-# begin of gif
-> list
-> list --running
-
-> show reason DEBUG
 ```
 
 <p align="center">
-  <img src="doc/img/cheetah-02.gif">
+  <img alt="Demo nach einem Neustart" src="doc/img/demo_restarted.jpg">
 </p>
-
-
-
-#### Namenserklärung
-
-Unser Simulator trägt den Namen **Cheetah** (Gepard). Das ist auf die Tatsache zurückzuführen, dass dieser eine Übersicht über alle verfügbaren Services erhält und Einsicht auf deren internen Berechnungen und Aufzeichnungen gewährt. Aus diesem Grund schummelt (Homophon: *Cheater*) er im Bezug auf tatsächliches Wissen in einer Applikation mit Eventual Consistency. Außerdem jagt und fordert er unsere Message Oriented Middleware *RabbitMQ*.
-
-
-
-### ViewService
-
-Das Kernstück des Projektes stellt der  View-Service dar. Das ist jenes Service, das mehrfach verteilt gestartet und angesprochen wird und lokale Daten mit den anderen View-Services synchronisiert.
-
-
-
-#### Interface
-
-```c#
-public interface IViewService
-{
-    void StartUp(string uid, string contextPath);
-    void ShutDown();
-    void Abort();
-    int GetViewCount();
-    void AddViews(int number = 1);
-    bool IsRunning();
-}
-```
-
-
-
-Außerdem beinhaltet die Implementierung eine einfache Persistierung, die alle wissenden Views von allen Services vorm Synchronisieren und beim Shutdown serialisiert in einer Datei ablegt. Beim Startup wird nachgeschaut, ob diese Datei existiert und gegebenenfalls mit diesem Zustand weitergemacht.
-
-Intern werden die Views in einem `ViewDataObject` gespeichert, das die eigenen Views und die Views von anderen synchronisierten Services mitspeichert. Hier kann dann die absolute Anzahl der Views berechnet werden.
-
-
-
-#### Synchronisierung
-
-Die Synchronisierung zwischen den Services wird mit dem Publish/Subscribe-Pattern über *RabbitMQ* durchgeführt.
-Dabei erfolgt ein Update nach einem gewissen Intervall ausgelöst durch ein Service.
-
-Pro View-Service gibt es eine Queue und über einen `ChannelExchangeName` wird ein Fanout durchgeführt (*Publish*). Außerdem erfolgt ein *Subscribe* auf dem gleichen ExchangeName.
-
-
-
-Übertragen wird hier nur der eigene (sichere) View-Count, man könnte allerdings die Logik auch erweitern und aufgrund von anderen - möglicherweise ungültigen oder abgelaufenen - Daten synchronisieren. Dabei muss man aber sicherlich Timestamps,  etc. mitliefern, um die Richtigkeit zu maximieren. Unsere Lösung wird demnach immer etwas hinter den echten absoluten Werten nachhinken und erst konsistent werden, wenn die Anzahl der einkommenden Anfragen überschaubar sinkt. Sobald alle Services das nächste Mal ein Update ausgesendet haben, sollte jeder Service die richtigen absoluten Views liefern können.
-
-
-
-### Client
-
-Die Client-Implementierung dient als Abstraktion vom Gateway. Hier verwendet der Simulator den Client: jeweils ein View-Service und ein Client wird immer gemeinsam angelegt. Der Client macht dann HTTP-Requests auf das Gateway und kann so die Anzahl der Views von Services auslesen oder verändern.
-
-
-
-## Sonstiges
-
-### Webbasiertes Management-Interface für RabbitMQ:
-
-<p align="center">
-  <img src="doc/img/rabbit-01.png">
-</p>
-
-<p align="center">
-  <img src="doc/img/rabbit-02.png">
-</p>
-
-### Beispiel der persistierten Service-Files:
-
-```json
-{
-    "OwnViews": 8134,
-    "Views": {
-        "service-1": 2392,
-        "service-2": 0
-    }
-}
-```
-
-
 
 ## Quellen
+
+Diese Quellen sind noch hauptsächlich von der alten Demo, in der
+nur Views als integer umhergeschickt wurden.
+Sie sind allerdings dennoch noch (entfernter) relevant:
 
 - [RabbitMQ](https://www.rabbitmq.com/getstarted.html)
 - [Why Computers Can't Count Sometimes](https://www.youtube.com/watch?v=RY_2gElt3SA)

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="237px" preserveAspectRatio="none" style="width:162px;height:237px;" version="1.1" viewBox="0 0 162 237" width="162px" zoomAndPan="magnify"><defs><filter height="300%" id="f1wms4dioxegfm" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--entity heartbeat_answer--><path d="M11,104 L145,104 C150,104 150,117.1484 150,117.1484 C150,117.1484 150,130.2969 145,130.2969 L11,130.2969 C6,130.2969 6,117.1484 6,117.1484 C6,117.1484 6,104 11,104 " fill="#FEFECE" filter="url(#f1wms4dioxegfm)" style="stroke: #A80036; stroke-width: 1.5;"/><path d="M145,104 C140,104 140,117.1484 140,117.1484 C140,130.2969 145,130.2969 145,130.2969 " fill="none" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="124" x="11" y="121.9951">heartbeat_answer</text><!--entity S1--><rect fill="#FEFECE" filter="url(#f1wms4dioxegfm)" height="36.2969" rx="35" ry="35" style="stroke: #000000; stroke-width: 1.5;" width="38" x="59" y="190"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="18" x="69" y="212.9951">S1</text><!--entity S2--><rect fill="#FEFECE" filter="url(#f1wms4dioxegfm)" height="36.2969" rx="35" ry="35" style="stroke: #000000; stroke-width: 1.5;" width="38" x="23" y="8"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="18" x="33" y="30.9951">S2</text><!--entity S3--><rect fill="#FEFECE" filter="url(#f1wms4dioxegfm)" height="36.2969" rx="35" ry="35" style="stroke: #000000; stroke-width: 1.5;" width="38" x="96" y="8"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="18" x="106" y="30.9951">S3</text><!--link heartbeat_answer to S1--><path d="M68.955,130.0029 C64.9108,143.9347 64.1774,167.2105 66.755,184.5309 " fill="none" id="heartbeat_answer-S1" style="stroke: #0000FF; stroke-width: 1.0;"/><polygon fill="#0000FF" points="67.6612,189.698,70.0464,180.1423,66.7975,184.7732,62.1667,181.5243,67.6612,189.698" style="stroke: #0000FF; stroke-width: 1.0;"/><!--link heartbeat_answer to S1--><path d="M87.5771,130.0029 C91.8592,143.9347 92.6357,167.2105 89.9065,184.5309 " fill="none" id="heartbeat_answer-S1-1" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="88.9469,189.698,94.5228,181.5795,89.8598,184.782,86.6573,180.119,88.9469,189.698" style="stroke: #A80036; stroke-width: 1.0;"/><!--link S2 to heartbeat_answer--><path d="M38.6316,44.16 C41.7915,60.135 51.4068,83.786 61.1767,99.534 " fill="none" id="S2-heartbeat_answer" style="stroke: #0000FF; stroke-width: 1.0;"/><polygon fill="#0000FF" points="63.9312,103.753,62.3613,94.0301,61.1982,99.566,55.6622,98.4029,63.9312,103.753" style="stroke: #0000FF; stroke-width: 1.0;"/><!--link S2 to heartbeat_answer--><path d="M62.6489,48.857 C72.4681,66.137 81.2513,89.629 82.6976,103.753 " fill="none" id="S2-heartbeat_answer-1" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="59.8572,44.16,61.0166,53.9404,62.4116,48.4582,67.8938,49.8533,59.8572,44.16" style="stroke: #A80036; stroke-width: 1.0;"/><!--link S3 to heartbeat_answer--><path d="M94.7615,48.857 C84.9054,66.137 75.8182,89.629 73.9762,103.753 " fill="none" id="S3-heartbeat_answer" style="stroke: #0000FF; stroke-width: 1.0;"/><polygon fill="#0000FF" points="97.5565,44.16,89.5164,49.8483,94.9994,48.4567,96.391,53.9397,97.5565,44.16" style="stroke: #0000FF; stroke-width: 1.0;"/><!--link S3 to heartbeat_answer--><path d="M118.782,44.16 C115.637,60.135 105.7529,83.786 95.6061,99.534 " fill="none" id="S3-heartbeat_answer-1" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="92.7426,103.753,101.107,98.5533,95.5509,99.6161,94.488,94.06,92.7426,103.753" style="stroke: #A80036; stroke-width: 1.0;"/><!--
+@startuml
+queue heartbeat_answer
+storage S1
+storage S2
+storage S3
+
+heartbeat_answer -[#blue]-> S1
+heartbeat_answer - -> S1
+S2 -[#blue]-> heartbeat_answer
+S2 <- - heartbeat_answer
+S3 <-[#blue]- heartbeat_answer
+S3 - -> heartbeat_answer
+@enduml
+
+PlantUML version 1.2019.07beta1(Unknown compile time)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Java Version: 1.7.0_25-b15
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

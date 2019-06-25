@@ -1,0 +1,12 @@
+@startuml
+
+queue heartbeat_signal
+storage S1
+storage S2
+storage S3
+
+heartbeat_signal <-- S1
+S2 <-- heartbeat_signal
+S3 <-- heartbeat_signal
+
+@enduml

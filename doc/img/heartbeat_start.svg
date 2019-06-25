@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="237px" preserveAspectRatio="none" style="width:128px;height:237px;" version="1.1" viewBox="0 0 128 237" width="128px" zoomAndPan="magnify"><defs><filter height="300%" id="ffxcxkyzo6l2c" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--entity exchange--><path d="M22,104 L100,104 C105,104 105,117.1484 105,117.1484 C105,117.1484 105,130.2969 100,130.2969 L22,130.2969 C17,130.2969 17,117.1484 17,117.1484 C17,117.1484 17,104 22,104 " fill="#FEFECE" filter="url(#ffxcxkyzo6l2c)" style="stroke: #A80036; stroke-width: 1.5;"/><path d="M100,104 C95,104 95,117.1484 95,117.1484 C95,130.2969 100,130.2969 100,130.2969 " fill="none" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="68" x="22" y="121.9951">exchange</text><!--entity S1--><rect fill="#FEFECE" filter="url(#ffxcxkyzo6l2c)" height="36.2969" rx="35" ry="35" style="stroke: #000000; stroke-width: 1.5;" width="38" x="42" y="190"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="18" x="52" y="212.9951">S1</text><!--entity S2--><rect fill="#FEFECE" filter="url(#ffxcxkyzo6l2c)" height="36.2969" rx="35" ry="35" style="stroke: #000000; stroke-width: 1.5;" width="38" x="6" y="8"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="18" x="16" y="30.9951">S2</text><!--entity S3--><rect fill="#FEFECE" filter="url(#ffxcxkyzo6l2c)" height="36.2969" rx="35" ry="35" style="stroke: #000000; stroke-width: 1.5;" width="38" x="79" y="8"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="18" x="89" y="30.9951">S3</text><!--link exchange to S1--><!--link S2 to exchange--><!--link S3 to exchange--><!--
+@startuml
+queue exchange
+storage S1
+storage S2
+storage S3
+
+exchange <-[hidden]- S1
+S2 <-[hidden]- exchange
+S3 <-[hidden]- exchange
+@enduml
+
+PlantUML version 1.2019.07beta1(Unknown compile time)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Java Version: 1.7.0_25-b15
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

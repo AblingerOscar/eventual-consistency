@@ -1,0 +1,15 @@
+@startuml
+
+queue heartbeat_answer
+storage S1
+storage S2
+storage S3
+
+heartbeat_answer -[#blue]-> S1
+heartbeat_answer --> S1
+S2 -[#blue]-> heartbeat_answer
+S2 <-- heartbeat_answer
+S3 <-[#blue]- heartbeat_answer
+S3 --> heartbeat_answer
+
+@enduml

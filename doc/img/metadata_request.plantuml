@@ -1,0 +1,12 @@
+@startuml
+
+storage S1
+storage S2
+storage S3
+
+S2 -[#blue]-> S1
+S2 -[#blue]> S3
+
+S3 <-- S1
+
+@enduml

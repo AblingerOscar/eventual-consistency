@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="237px" preserveAspectRatio="none" style="width:152px;height:237px;" version="1.1" viewBox="0 0 152 237" width="152px" zoomAndPan="magnify"><defs><filter height="300%" id="f1f9r3s474rxjw" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--entity heartbeat_signal--><path d="M11,104 L135,104 C140,104 140,117.1484 140,117.1484 C140,117.1484 140,130.2969 135,130.2969 L11,130.2969 C6,130.2969 6,117.1484 6,117.1484 C6,117.1484 6,104 11,104 " fill="#FEFECE" filter="url(#f1f9r3s474rxjw)" style="stroke: #A80036; stroke-width: 1.5;"/><path d="M135,104 C130,104 130,117.1484 130,117.1484 C130,130.2969 135,130.2969 135,130.2969 " fill="none" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="114" x="11" y="121.9951">heartbeat_signal</text><!--entity S1--><rect fill="#FEFECE" filter="url(#f1f9r3s474rxjw)" height="36.2969" rx="35" ry="35" style="stroke: #000000; stroke-width: 1.5;" width="38" x="54" y="190"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="18" x="64" y="212.9951">S1</text><!--entity S2--><rect fill="#FEFECE" filter="url(#f1f9r3s474rxjw)" height="36.2969" rx="35" ry="35" style="stroke: #000000; stroke-width: 1.5;" width="38" x="18" y="8"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="18" x="28" y="30.9951">S2</text><!--entity S3--><rect fill="#FEFECE" filter="url(#f1f9r3s474rxjw)" height="36.2969" rx="35" ry="35" style="stroke: #000000; stroke-width: 1.5;" width="38" x="91" y="8"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="18" x="101" y="30.9951">S3</text><!--link heartbeat_signal to S1--><path d="M73,135.0174 C73,150.7149 73,173.9108 73,189.698 " fill="none" id="heartbeat_signal-S1" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="73,130.0029,69,139.0029,73,135.0029,77,139.0029,73,130.0029" style="stroke: #A80036; stroke-width: 1.0;"/><!--link S2 to heartbeat_signal--><path d="M45.8408,48.857 C52.8309,66.137 62.333,89.629 68.0463,103.753 " fill="none" id="S2-heartbeat_signal" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="43.9412,44.16,43.6094,54.0033,45.8168,48.7949,51.0252,51.0023,43.9412,44.16" style="stroke: #A80036; stroke-width: 1.0;"/><!--link S3 to heartbeat_signal--><path d="M100.9136,48.857 C93.7294,66.137 83.9633,89.629 78.0913,103.753 " fill="none" id="S3-heartbeat_signal" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="102.866,44.16,95.7168,50.9341,100.9461,48.7767,103.1035,54.006,102.866,44.16" style="stroke: #A80036; stroke-width: 1.0;"/><!--
+@startuml
+queue heartbeat_signal
+storage S1
+storage S2
+storage S3
+
+heartbeat_signal <- - S1
+S2 <- - heartbeat_signal
+S3 <- - heartbeat_signal
+@enduml
+
+PlantUML version 1.2019.07beta1(Unknown compile time)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Java Version: 1.7.0_25-b15
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

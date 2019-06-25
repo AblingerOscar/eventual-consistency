@@ -1,0 +1,57 @@
+@startuml
+
+interface ISyncService
+interface ICheetahSyncService
+
+[SyncService]
+
+ISyncService <|-- ICheetahSyncService
+ICheetahSyncService <|-- SyncService
+
+interface IModule
+interface IMetaDataShareModule
+interface IHeartbeatModule
+interface IFileManagerModule
+interface IUpdaterModule
+
+[MetaDataShareModule]
+[HeartbeatModule]
+[FileManagerModule]
+[UpdaterModule]
+
+IModule -[hidden] SyncService
+IMetaDataShareModule --|> IModule
+IHeartbeatModule --|> IModule
+IFileManagerModule --|> IModule
+IUpdaterModule --|> IModule
+
+IMetaDataShareModule <|-- MetaDataShareModule
+IHeartbeatModule <|-- HeartbeatModule
+IFileManagerModule <|-- FileManagerModule
+IUpdaterModule <|-- UpdaterModule
+
+FileManagerModule -[hidden] HeartbeatModule
+
+SyncService --* IMetaDataShareModule
+SyncService --* IHeartbeatModule
+SyncService --* IFileManagerModule
+SyncService --* IUpdaterModule
+
+[HeartbeatSignalModule]
+[HeartbeatAnswerModule]
+[MetaDataRequestModule]
+[MetaDataAnswerModule]
+
+HeartbeatModule --* HeartbeatSignalModule
+HeartbeatModule --* HeartbeatAnswerModule
+MetaDataShareModule --* MetaDataRequestModule
+MetaDataShareModule --* MetaDataAnswerModule
+
+[RabbitMQNode<<abstract>>] as RabbitMQNode
+
+HeartbeatSignalModule -->> RabbitMQNode
+HeartbeatAnswerModule -->> RabbitMQNode
+MetaDataRequestModule -->> RabbitMQNode
+MetaDataAnswerModule -->> RabbitMQNode
+
+@enduml
