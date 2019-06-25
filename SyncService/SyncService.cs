@@ -28,6 +28,7 @@ namespace SyncService
         private IUpdaterModule updaterModule;
         private IFileManagerModule fileManagerModule;
 
+        #region Setup
         public SyncService(string uid, string syncPath, string savePath)
         {
             UID = uid;
@@ -76,20 +77,26 @@ namespace SyncService
         private void SetUpMetaDataShareModule()
         {
             metaDataModule = new MetaDataShareModule(GetDomesticChangesSince, GetAlienChangesSince);
-            metaDataModule.OnMetaDataExchangeReceived += (sender, args) =>
-            {
-                var changes = new List<ChangeSet>(args.MetaDataAnswer.AlienChanges)
+            metaDataModule.OnMetaDataExchangeReceived += OnMetaDataExchangeReceived;
+        }
+
+        private void OnMetaDataExchangeReceived(IMetaDataShareModule sender, MetaDataAnswerReceivedArgs args)
+        {
+            var changes = new List<ChangeSet>(args.MetaDataAnswer.AlienChanges)
                 {
                     args.MetaDataAnswer.DomesticChanges
                 };
 
-                foreach (var changeSet in changes)
+            foreach (var changeSet in changes)
+            {
+                var changeData = changeSet.Changes.OrderBy(c => c.TimeStamp).ToList();
+
+                lock (data)
                 {
-                    var changeData = changeSet.Changes.OrderBy(c => c.TimeStamp).ToList();
                     fileManagerModule.ApplyChanges(changeData);
                     data.AddSortedAlienChanges(changeSet.ServiceUID, changeData);
                 }
-            };
+            }
         }
 
         private void SetUpUpdaterModule()
@@ -115,17 +122,23 @@ namespace SyncService
 
         private IList<FileChangeMetaData> GetSortedSavedChanges()
         {
-            var changes = new List<FileChangeMetaData>(data.DomesticChanges);
-
-            foreach (var alienChangesKVP in data.AlienChanges)
+            List<FileChangeMetaData> changes;
+            lock (data)
             {
-                changes.AddRange(alienChangesKVP.Value);
+                changes = new List<FileChangeMetaData>(data.DomesticChanges);
+
+                foreach (var alienChangesKVP in data.AlienChanges)
+                {
+                    changes.AddRange(alienChangesKVP.Value);
+                }
             }
 
             SyncData.Sort(changes);
             return changes;
         }
+        #endregion
 
+        #region ISyncService methods implementation
         public void Abort()
         {
             IsRunning = false;
@@ -148,7 +161,9 @@ namespace SyncService
             ActivateModules();
             heartbeatModule.SendHeartbeat();
         }
+        #endregion
 
+        #region Private Helper methods
         private IDictionary<string, DateTime> GetKnownChanges()
         {
             return new Dictionary<string, DateTime>(LastKnownChangeTime)
@@ -159,43 +174,53 @@ namespace SyncService
 
         private void LoadSavedData()
         {
-            try
+            lock (data)
             {
-                string json = File.ReadAllText(SavePath);
-                data = JsonConvert.DeserializeObject<SyncData>(json);
-                UpdateLastChangesFromData();
-            }
-            catch (Exception)
-            {
-                OnLog?.Invoke(this, new OnLogHandlerArgs("Loading default data as save file could not be read", LogReason.USER_INFO));
-                data = new SyncData();
-                LastDomesticChangeTime = DateTime.Now;
-                LastKnownChangeTime = new Dictionary<string, DateTime>();
+                try
+                {
+                    string json = File.ReadAllText(SavePath);
+                    data = JsonConvert.DeserializeObject<SyncData>(json);
+                    UpdateLastChangesFromData();
+                }
+                catch (Exception)
+                {
+                    OnLog?.Invoke(this, new OnLogHandlerArgs("Loading default data as save file could not be read", LogReason.USER_INFO));
+                    data = new SyncData();
+                    LastDomesticChangeTime = DateTime.Now;
+                    LastKnownChangeTime = new Dictionary<string, DateTime>();
+                }
             }
         }
 
         private void UpdateLastChangesFromData()
         {
-            LastDomesticChangeTime = data.DomesticChanges[data.DomesticChanges.Count - 1].TimeStamp;
-
-            foreach (var alienChanges in data.AlienChanges)
+            lock (data)
             {
-                LastKnownChangeTime[alienChanges.Key] = alienChanges.Value[alienChanges.Value.Count - 1].TimeStamp;
+                LastDomesticChangeTime = data.DomesticChanges[data.DomesticChanges.Count - 1].TimeStamp;
+
+                foreach (var alienChanges in data.AlienChanges)
+                {
+                    LastKnownChangeTime[alienChanges.Key] = alienChanges.Value[alienChanges.Value.Count - 1].TimeStamp;
+                }
             }
         }
 
         private void SaveData()
         {
-            if (data != null)
+            try
             {
-                try
+                if (data != null)
                 {
-                    File.WriteAllText(SavePath, JsonConvert.SerializeObject(data));
+                    lock (data)
+                    {
+                        if (data != null)
+                            File.WriteAllText(SavePath, JsonConvert.SerializeObject(data));
+                    }
                 }
-                catch (Exception)
-                {
-                    OnLog?.Invoke(this, new OnLogHandlerArgs("Could not save data", LogReason.DEBUG, OutputLevel.ERROR));
-                }
+            }
+            catch (Exception)
+            {
+                OnLog?.Invoke(this, new OnLogHandlerArgs("Could not save data", LogReason.DEBUG, OutputLevel.ERROR));
             }
         }
 
@@ -215,7 +240,10 @@ namespace SyncService
 
         private ChangeSet GetDomesticChangesSince(DateTime timestamp)
         {
-            var changesSince = data.DomesticChanges.SkipWhile(ch => ch.TimeStamp < timestamp).ToList();
+            lock (data)
+            {
+                var changesSince = data.DomesticChanges.SkipWhile(ch => ch.TimeStamp < timestamp).ToList();
+            }
 
             return new ChangeSet()
             {
@@ -241,7 +269,10 @@ namespace SyncService
 
         private ChangeSet GetAlienChangeSetSince(string serviceId, DateTime timestamp)
         {
-            var changes = data.AlienChanges[serviceId].SkipWhile(ch => ch.TimeStamp < timestamp).ToList();
+            lock (data)
+            {
+                var changes = data.AlienChanges[serviceId].SkipWhile(ch => ch.TimeStamp < timestamp).ToList();
+            }
 
             return new ChangeSet()
             {
@@ -250,5 +281,44 @@ namespace SyncService
                 Changes = changes
             };
         }
+        #endregion
+
+        #region ICheetahSyncService methods implemantation
+        public void AddFile(string fileName, string content)
+        {
+            if (!IsRunning)
+                throw new InvalidOperationException("Service is not running");
+
+            lock(data)
+            {
+                var change = fileManagerModule.AddFile(fileName, content);
+                data.AddSortedDomesticChanges(new List<FileChangeMetaData>() { change });
+            }
+        }
+
+        public void DeleteFile(string fileName)
+        {
+            if (!IsRunning)
+                throw new InvalidOperationException("Service is not running");
+
+            lock(data)
+            {
+                var change = fileManagerModule.DeleteFile(fileName);
+                data.AddSortedDomesticChanges(new List<FileChangeMetaData>() { change });
+            }
+        }
+
+        public void UpdateFile(string fileName, string content)
+        {
+            if (!IsRunning)
+                throw new InvalidOperationException("Service is not running");
+
+            lock(data)
+            {
+                var change = fileManagerModule.UpdateFile(fileName, content);
+                data.AddSortedDomesticChanges(new List<FileChangeMetaData>() { change });
+            }
+        }
+        #endregion
     }
 }

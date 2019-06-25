@@ -9,10 +9,7 @@ namespace SyncService
         /// <summary>
         /// Starts the client in the current Thread
         /// </summary>
-        /// <param name="uid">The unique identifier for the Service</param>
-        /// <param name="syncPath">The folder with the actual files that should get synchronized</param>
-        /// <param name="savePath">The folder in which the service can save its data</param>
-        void StartUp(string uid, string syncPath, string savePath);
+        void StartUp();
 
         /// <summary>
         /// Shuts down the Service gracefully. It persists its data and might send a last update to other Services
