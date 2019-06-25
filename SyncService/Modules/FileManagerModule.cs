@@ -35,6 +35,8 @@ namespace SyncService.Modules
         {
             this.directory = directory;
             GetSortedSavedChanges = getSortedSavedChanges;
+            Directory.CreateDirectory(ActualDirectory);
+            Directory.CreateDirectory(HistoryDirectory);
         }
 
         public void Activate(string serviceId)
@@ -51,6 +53,9 @@ namespace SyncService.Modules
 
         public void ApplyChanges(IList<FileChangeMetaData> newChanges)
         {
+            if (!IsActive)
+                throw new InvalidOperationException("Module 'FileManagerModule' is not active");
+
             var savedChanges = GetSortedSavedChanges();
 
             foreach (var change in newChanges)
@@ -179,6 +184,9 @@ namespace SyncService.Modules
 
         public FileChangeMetaData AddFile(string fileName, string content)
         {
+            if (!IsActive)
+                throw new InvalidOperationException("Module 'FileManagerModule' is not active");
+
             var patchId = GetNextPatchId();
             SaveFile(serviceId, patchId, fileName, content);
             return new FileChangeNewMetaData(
@@ -191,6 +199,9 @@ namespace SyncService.Modules
 
         public FileChangeMetaData DeleteFile(string fileName)
         {
+            if (!IsActive)
+                throw new InvalidOperationException("Module 'FileManagerModule' is not active");
+
             var patchId = GetNextPatchId();
             DeleteFile(serviceId, patchId, fileName);
             return new FileChangeDeleteMetaData(
@@ -203,6 +214,9 @@ namespace SyncService.Modules
 
         public FileChangeMetaData UpdateFile(string fileName, string content)
         {
+            if (!IsActive)
+                throw new InvalidOperationException("Module 'FileManagerModule' is not active");
+
             var patchId = GetNextPatchId();
             SaveFile(serviceId, patchId, fileName, content);
             return new FileChangeUpdateMetaData(
@@ -215,6 +229,9 @@ namespace SyncService.Modules
 
         public IList<Tuple<string, string>> GetAllFiles()
         {
+            if (!IsActive)
+                throw new InvalidOperationException("Module 'FileManagerModule' is not active");
+
             var fileNames = Directory.GetFiles(ActualDirectory);
 
             return fileNames.Select(name => new Tuple<string, string>(name, GetFile(name))).ToList();
@@ -222,6 +239,9 @@ namespace SyncService.Modules
 
         public string GetFile(string name)
         {
+            if (!IsActive)
+                throw new InvalidOperationException("Module 'FileManagerModule' is not active");
+
             try
             {
                 return File.ReadAllText(Path.Combine(ActualDirectory, name));
@@ -234,6 +254,9 @@ namespace SyncService.Modules
 
         public string GetHistoryFile(string fileName, string serviceId, int patchId)
         {
+            if (!IsActive)
+                throw new InvalidOperationException("Module 'FileManagerModule' is not active");
+
             try
             {
                 return File.ReadAllText(
@@ -248,6 +271,9 @@ namespace SyncService.Modules
 
         public bool FileExists(string name)
         {
+            if (!IsActive)
+                throw new InvalidOperationException("Module 'FileManagerModule' is not active");
+
             return File.Exists(Path.Combine(ActualDirectory, name));
         }
 
