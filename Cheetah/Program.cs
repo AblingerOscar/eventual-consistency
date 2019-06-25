@@ -291,7 +291,10 @@ namespace Cheetah
         private void UploadCommand(Arguments args)
         {
             if (args.ArgumentList.Count() != 4)
+            {
                 cli.DispatchCommand("help upload");
+                return;
+            }
 
             var si = ReadServiceInformation(args, "help upload");
             var fileName = args.ArgumentList[2];
@@ -302,7 +305,10 @@ namespace Cheetah
         private void UpdateCommand(Arguments args)
         {
             if (args.ArgumentList.Count() != 4)
+            {
                 cli.DispatchCommand("help update");
+                return;
+            }
 
             var si = ReadServiceInformation(args, "help update");
             var fileName = args.ArgumentList[2];
@@ -313,7 +319,10 @@ namespace Cheetah
         private void DeleteCommand(Arguments args)
         {
             if (args.ArgumentList.Count() != 3)
+            {
                 cli.DispatchCommand("help delete");
+                return;
+            }
 
             var si = ReadServiceInformation(args, "help delete");
             var fileName = args.ArgumentList[2];
