@@ -60,8 +60,9 @@ namespace SyncService.Modules
                 throw new InvalidOperationException("Module 'FileManagerModule' is not active");
 
             var savedChanges = GetSortedSavedChanges();
+            var filteredChanges = newChanges.Except(savedChanges, new MetaDataComparer());
 
-            foreach (var change in newChanges)
+            foreach (var change in filteredChanges)
             {
                 ApplyChanges(change, savedChanges);
             }
@@ -319,6 +320,22 @@ namespace SyncService.Modules
         private void DeleteFile(string serviceId, int patchId, string fileName)
         {
             File.Delete(Path.Combine(ActualDirectory, fileName));
+        }
+
+        private class MetaDataComparer : IEqualityComparer<FileChangeMetaData>
+        {
+            public bool Equals(FileChangeMetaData x, FileChangeMetaData y)
+            {
+                return x.DomesticServiceId == y.DomesticServiceId &&
+                    x.PatchId == y.PatchId;
+            }
+
+            public int GetHashCode(FileChangeMetaData obj)
+            {
+                return ((486187739 +
+                    obj.DomesticServiceId.GetHashCode()) * 21 +
+                    obj.PatchId.GetHashCode()) * 21;
+            }
         }
     }
 }
