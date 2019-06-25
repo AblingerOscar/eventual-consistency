@@ -24,11 +24,13 @@ namespace SyncService
         private SyncData data;
         private IHeartbeatModule heartbeatModule;
         private IMetaDataShareModule metaDataModule;
+        private IUpdaterModule updaterModule;
 
         public SyncService()
         {
             SetUpHeartbeatModule();
             SetUpMetaDataShareModule();
+            SetUpUpdaterModule();
         }
 
         private void SetUpHeartbeatModule()
@@ -80,6 +82,15 @@ namespace SyncService
                     var changeData = changeSet.Changes.OrderBy(c => c.TimeStamp).ToList();
                     data.AddSortedAlienChanges(changeSet.ServiceUID, changeData);
                 }
+            };
+        }
+
+        private void SetUpUpdaterModule()
+        {
+            updaterModule = new UpdaterModule();
+            updaterModule.OnUpdateAlienChanges += (sender, outDatedList) =>
+            {
+                heartbeatModule.SendHeartbeat();
             };
         }
 
