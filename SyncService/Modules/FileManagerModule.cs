@@ -16,6 +16,7 @@ namespace SyncService.Modules
         private int currPatchId = 0;
 
         private Func<IList<FileChangeMetaData>> GetSortedSavedChanges;
+        private Func<int> GetHighestPatchId;
         private string directory;
         private string serviceId;
 
@@ -31,8 +32,9 @@ namespace SyncService.Modules
             }
         }
 
-        public FileManagerModule(string directory, Func<IList<FileChangeMetaData>> getSortedSavedChanges)
+        public FileManagerModule(string directory, Func<int> getHighestPatchId, Func<IList<FileChangeMetaData>> getSortedSavedChanges)
         {
+            this.GetHighestPatchId = getHighestPatchId;
             this.directory = directory;
             GetSortedSavedChanges = getSortedSavedChanges;
             Directory.CreateDirectory(ActualDirectory);
@@ -41,6 +43,7 @@ namespace SyncService.Modules
 
         public void Activate(string serviceId)
         {
+            currPatchId = GetHighestPatchId();
             IsActive = true;
             this.serviceId = serviceId;
         }
