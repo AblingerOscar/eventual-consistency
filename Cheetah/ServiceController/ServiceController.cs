@@ -43,13 +43,21 @@ namespace Cheetah.ServiceController
 
         public bool StartService(ServiceInformation si)
         {
+            CheckPathsExist();
+
             var serviceId = IDService.GetServiceUIDForId(si.ID);
             si.Service.StartUp(
                 serviceId,
                 Path.Combine(PersistenceConfiguration.SyncDirectory, serviceId),
-                Path.Combine(PersistenceConfiguration.DBDirectory, serviceId)
+                Path.Combine(PersistenceConfiguration.DBDirectory, serviceId + ".dat")
                 );
             return true;
+        }
+
+        private void CheckPathsExist()
+        {
+            Directory.CreateDirectory(PersistenceConfiguration.SyncDirectory);
+            Directory.CreateDirectory(PersistenceConfiguration.DBDirectory);
         }
 
         public void StopService(ServiceInformation si)
