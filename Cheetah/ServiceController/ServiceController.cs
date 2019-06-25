@@ -25,14 +25,23 @@ namespace Cheetah.ServiceController
 
         public void AbortService(ServiceInformation si)
         {
-            si.Service.Abort();
+            if (si.Service.IsRunning)
+                si.Service.Abort();
         }
 
         public ServiceInformation CreateNewService()
         {
+            CheckPathsExist();
+
+            var id = IDService.GenerateNextID();
+            var serviceId = IDService.GetServiceUIDForId(id);
             var si = new ServiceInformation(
-                IDService.GenerateNextID(),
-                new SyncService.SyncService()
+                id,
+                new SyncService.SyncService(
+                    serviceId,
+                    Path.Combine(PersistenceConfiguration.SyncDirectory, serviceId),
+                    Path.Combine(PersistenceConfiguration.DBDirectory, serviceId + ".dat")
+                    )
                 );
             services.Add(si);
 
@@ -43,15 +52,11 @@ namespace Cheetah.ServiceController
 
         public bool StartService(ServiceInformation si)
         {
-            CheckPathsExist();
+            if (si.Service.IsRunning)
+                return true;
 
-            var serviceId = IDService.GetServiceUIDForId(si.ID);
-            si.Service.StartUp(
-                serviceId,
-                Path.Combine(PersistenceConfiguration.SyncDirectory, serviceId),
-                Path.Combine(PersistenceConfiguration.DBDirectory, serviceId + ".dat")
-                );
-            return true;
+            si.Service.StartUp();
+            return false;
         }
 
         private void CheckPathsExist()
@@ -62,7 +67,45 @@ namespace Cheetah.ServiceController
 
         public void StopService(ServiceInformation si)
         {
-            si.Service.ShutDown();
+            if (si.Service.IsRunning)
+                si.Service.ShutDown();
+        }
+
+        public bool UploadFile(ServiceInformation si, string fileName, string localFilePath)
+        {
+            string content = null;
+            try
+            {
+                content = File.ReadAllText(Path.Combine(PersistenceConfiguration.ExampleFilesDirectory, localFilePath));
+            } catch(Exception)
+            {
+                
+                return false;
+            }
+
+            si.Service.AddFile(fileName, content);
+            return true;
+        }
+
+        public bool UpdateFile(ServiceInformation si, string fileName, string localFilePath)
+        {
+            string content = null;
+            try
+            {
+                content = File.ReadAllText(Path.Combine(PersistenceConfiguration.ExampleFilesDirectory, localFilePath));
+            } catch(Exception)
+            {
+                
+                return false;
+            }
+
+            si.Service.UpdateFile(fileName, content);
+            return true;
+        }
+
+        public void DeleteFile(ServiceInformation si, string fileName)
+        {
+            si.Service.DeleteFile(fileName);
         }
     }
 }

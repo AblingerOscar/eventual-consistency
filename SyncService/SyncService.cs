@@ -19,7 +19,6 @@ namespace SyncService
         public string SavePath { get; private set; }
         public string UID { get; private set; }
         public string SyncPath { get; private set; }
-        public DateTime LastDomesticChangeTime { get; private set; }
         public IDictionary<string, DateTime> LastKnownChangeTime { get; private set; }
 
         private SyncData data;
@@ -47,11 +46,12 @@ namespace SyncService
 
             heartbeatModule.OnHeartbeatAnswerReceived += (sender, args) =>
             {
+                var receiverId = args.HeartbeatReq.SenderUID;
                 OnLog?.Invoke(this, new OnLogHandlerArgs(
-                    "Heartbeat answer received from " + args.HeartbeatReq.SenderUID + " with " + args.HeartbeatReq.KnownChanges.Count + " known changes",
+                    "Heartbeat answer received from " + receiverId + " with " + args.HeartbeatReq.KnownChanges.Count + " known changes",
                     LogReason.RABBITMQ_COMMUNICATION
                     ));
-                metaDataModule.SendMetaDataShareRequest(args.HeartbeatReq.SenderUID, CreateMetaDataRequest());
+                metaDataModule.SendMetaDataShareRequest(receiverId, CreateMetaDataRequest(receiverId));
             };
 
             heartbeatModule.OnOutdatedLocalChanges += (sender, args) =>
@@ -64,12 +64,16 @@ namespace SyncService
             };
         }
 
-        private MetaDataRequest CreateMetaDataRequest()
+        private MetaDataRequest CreateMetaDataRequest(string receiverId)
         {
+            var receiverLastKnownChangeTime = LastKnownChangeTime.ContainsKey(receiverId)
+                ? LastKnownChangeTime[receiverId]
+                : DateTime.MinValue;
+
             return new MetaDataRequest()
             {
                 ServiceId = UID,
-                DomesticChangesSince = LastDomesticChangeTime,
+                DomesticChangesSince = receiverLastKnownChangeTime,
                 AlienChangesSince = LastKnownChangeTime
             };
         }
@@ -82,10 +86,17 @@ namespace SyncService
 
         private void OnMetaDataExchangeReceived(IMetaDataShareModule sender, MetaDataAnswerReceivedArgs args)
         {
-            var changes = new List<ChangeSet>(args.MetaDataAnswer.AlienChanges)
-                {
-                    args.MetaDataAnswer.DomesticChanges
-                };
+            OnLog?.Invoke(this, new OnLogHandlerArgs(
+                $"Received MetaDataExchange with {args.MetaDataAnswer?.DomesticChanges.Changes.Count} domestic changes" +
+                $" and changes from {args.MetaDataAnswer.AlienChanges.Count} other services",
+                LogReason.RABBITMQ_COMMUNICATION));
+
+            var changes = new List<ChangeSet>();
+            if (args.MetaDataAnswer.AlienChanges != null)
+                changes.AddRange(args.MetaDataAnswer.AlienChanges);
+
+            if (args.MetaDataAnswer.DomesticChanges != null)
+                changes.Add(args.MetaDataAnswer.DomesticChanges);
 
             foreach (var changeSet in changes)
             {
@@ -168,27 +179,28 @@ namespace SyncService
         {
             return new Dictionary<string, DateTime>(LastKnownChangeTime)
             {
-                { UID, LastDomesticChangeTime }
+                { UID, DateTime.Now }
             };
         }
 
         private void LoadSavedData()
         {
-            lock (data)
+            if (data != null)
             {
-                try
-                {
-                    string json = File.ReadAllText(SavePath);
-                    data = JsonConvert.DeserializeObject<SyncData>(json);
-                    UpdateLastChangesFromData();
-                }
-                catch (Exception)
-                {
-                    OnLog?.Invoke(this, new OnLogHandlerArgs("Loading default data as save file could not be read", LogReason.USER_INFO));
-                    data = new SyncData();
-                    LastDomesticChangeTime = DateTime.Now;
-                    LastKnownChangeTime = new Dictionary<string, DateTime>();
-                }
+                data = null;
+            }
+
+            try
+            {
+                string json = File.ReadAllText(SavePath);
+                data = JsonConvert.DeserializeObject<SyncData>(json);
+                UpdateLastChangesFromData();
+            }
+            catch (Exception)
+            {
+                OnLog?.Invoke(this, new OnLogHandlerArgs("Loading default data as save file could not be read", LogReason.USER_INFO));
+                data = new SyncData();
+                LastKnownChangeTime = new Dictionary<string, DateTime>();
             }
         }
 
@@ -196,11 +208,10 @@ namespace SyncService
         {
             lock (data)
             {
-                LastDomesticChangeTime = data.DomesticChanges[data.DomesticChanges.Count - 1].TimeStamp;
-
+                LastKnownChangeTime = new Dictionary<string, DateTime>();
                 foreach (var alienChanges in data.AlienChanges)
                 {
-                    LastKnownChangeTime[alienChanges.Key] = alienChanges.Value[alienChanges.Value.Count - 1].TimeStamp;
+                    LastKnownChangeTime.Add(alienChanges.Key, alienChanges.Value[alienChanges.Value.Count - 1].TimeStamp);
                 }
             }
         }
@@ -229,6 +240,7 @@ namespace SyncService
             heartbeatModule.Activate(UID);
             metaDataModule.Activate(UID);
             updaterModule.Activate(UID);
+            fileManagerModule.Activate(UID);
         }
 
         private void DeactivateModules()
@@ -236,14 +248,21 @@ namespace SyncService
             heartbeatModule.Deactivate();
             metaDataModule.Deactivate();
             updaterModule.Deactivate();
+            fileManagerModule.Deactivate();
         }
 
         private ChangeSet GetDomesticChangesSince(DateTime timestamp)
         {
+            IList<FileChangeMetaData> changesSince;
             lock (data)
             {
-                var changesSince = data.DomesticChanges.SkipWhile(ch => ch.TimeStamp < timestamp).ToList();
+                changesSince = data.DomesticChanges.SkipWhile(ch => ch.TimeStamp < timestamp).ToList();
             }
+
+            OnLog?.Invoke(this, new OnLogHandlerArgs(
+                $"Changes since {timestamp.ToString()}: " +
+                string.Join(",", changesSince.Select(md => md.DomesticServiceId)),
+                LogReason.DEBUG));
 
             return new ChangeSet()
             {
@@ -269,9 +288,10 @@ namespace SyncService
 
         private ChangeSet GetAlienChangeSetSince(string serviceId, DateTime timestamp)
         {
+            List<FileChangeMetaData> changes;
             lock (data)
             {
-                var changes = data.AlienChanges[serviceId].SkipWhile(ch => ch.TimeStamp < timestamp).ToList();
+                changes = data.AlienChanges[serviceId].SkipWhile(ch => ch.TimeStamp < timestamp).ToList();
             }
 
             return new ChangeSet()
@@ -289,7 +309,7 @@ namespace SyncService
             if (!IsRunning)
                 throw new InvalidOperationException("Service is not running");
 
-            lock(data)
+            lock (data)
             {
                 var change = fileManagerModule.AddFile(fileName, content);
                 data.AddSortedDomesticChanges(new List<FileChangeMetaData>() { change });
@@ -301,7 +321,7 @@ namespace SyncService
             if (!IsRunning)
                 throw new InvalidOperationException("Service is not running");
 
-            lock(data)
+            lock (data)
             {
                 var change = fileManagerModule.DeleteFile(fileName);
                 data.AddSortedDomesticChanges(new List<FileChangeMetaData>() { change });
@@ -313,7 +333,7 @@ namespace SyncService
             if (!IsRunning)
                 throw new InvalidOperationException("Service is not running");
 
-            lock(data)
+            lock (data)
             {
                 var change = fileManagerModule.UpdateFile(fileName, content);
                 data.AddSortedDomesticChanges(new List<FileChangeMetaData>() { change });

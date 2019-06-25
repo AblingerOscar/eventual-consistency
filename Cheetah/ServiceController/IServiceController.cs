@@ -40,5 +40,27 @@ namespace Cheetah.ServiceController
         /// </summary>
         /// <param name="si">The service information for the service to abort</param>
         void AbortService(ServiceInformation si);
+        /// <summary>
+        /// Uploads the text content of a local file to a service
+        /// </summary>
+        /// <param name="si">The service information for the service</param>
+        /// <param name="fileName">The name the new file on the service should have</param>
+        /// <param name="localFilePath">The path to a file in the local 'exampleFiles' folder</param>
+        /// <returns>False if the local file could not be found</returns>
+        bool UploadFile(ServiceInformation si, string fileName, string localFilePath);
+        /// <summary>
+        /// Updates a file that's on a service with new content
+        /// </summary>
+        /// <param name="si">The service information for the service</param>
+        /// <param name="fileName">The name of the file on the service</param>
+        /// <param name="localFilePath">The path to a file in the local 'exampleFiles' folder</param>
+        /// <returns>False if the local file could not be found</returns>
+        bool UpdateFile(ServiceInformation si, string fileName, string localFilePath);
+        /// <summary>
+        /// Deletes a file on the service
+        /// </summary>
+        /// <param name="si">The service information for the service</param>
+        /// <param name="fileName">The name of the file on the service</param>
+        void DeleteFile(ServiceInformation si, string fileName);
     }
 }

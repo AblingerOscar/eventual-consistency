@@ -10,8 +10,6 @@ namespace Cheetah.ServiceController
         public int ID { get; }
         public ICheetahSyncService Service;
 
-
-
         public bool IsRunning {
             get {
                 return Service.IsRunning;
@@ -30,7 +28,7 @@ namespace Cheetah.ServiceController
             sb.AppendLine($"Service id: {ID}\n" + $"is active: {IsRunning}");
             if (IsRunning)
             {
-                sb.AppendLine("\t- last domestic change time: {Service.LastDomesticChangeTime}");
+                sb.AppendLine($"\tLast known change times of other services:");
                 foreach (var changeKvp in Service.LastKnownChangeTime)
                 {
                     sb.AppendLine($"\t- {changeKvp.Key}: {changeKvp.Value}");

@@ -173,13 +173,18 @@ namespace SyncService.Modules
             try
             {
                 return File.ReadAllText(
-                    Path.Combine(HistoryDirectory, metaData.DomesticServiceId, metaData.PatchId.ToString(), metaData.FileName)
+                    GetServiceHistory(metaData.DomesticServiceId, metaData.PatchId, metaData.FileName)
                     );
             }
             catch (Exception)
             {
                 return null;
             }
+        }
+
+        private string GetServiceHistory(string serviceId, int patchId, string fileName)
+        {
+            return Path.Combine(directory, "..", serviceId, ".history", serviceId, patchId.ToString(), fileName);
         }
 
         public FileChangeMetaData AddFile(string fileName, string content)
@@ -287,6 +292,7 @@ namespace SyncService.Modules
 
         private void SaveFile(string serviceId, int patchId, string fileName, string content)
         {
+            Directory.CreateDirectory(ActualDirectory);
             File.WriteAllText(Path.Combine(ActualDirectory, fileName), content);
             SaveFileInHistory(serviceId, patchId, fileName, content);
         }
@@ -296,8 +302,10 @@ namespace SyncService.Modules
 
         private void SaveFileInHistory(string serviceId, int patchId, string fileName, string content)
         {
+            var directory = Path.Combine(HistoryDirectory, serviceId, patchId.ToString());
+            Directory.CreateDirectory(directory);
             File.WriteAllText(
-                Path.Combine(HistoryDirectory, serviceId, patchId.ToString(), fileName),
+                Path.Combine(directory, fileName),
                 content
                 );
         }

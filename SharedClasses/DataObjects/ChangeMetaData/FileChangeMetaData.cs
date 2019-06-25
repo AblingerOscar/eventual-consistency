@@ -26,6 +26,7 @@ namespace SharedClasses.DataObjects.ChangeMetaData
         {
             FileName = fileName;
             PatchId = patchId;
+            DomesticServiceId = domesticServiceId;
         }
 
         public FileChangeMetaData(ChangeType type, string fileName, string domesticServiceId, int patchId, DateTime timestamp) :

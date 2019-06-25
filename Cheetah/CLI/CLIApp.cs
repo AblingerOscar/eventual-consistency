@@ -73,13 +73,13 @@ namespace Cheetah.CLI
 
         private void ExecuteCommand(string cmdName, string input)
         {
-            try
-            {
+            /*try
+            {*/
                 commands[cmdName].Action(new Arguments(input));
-            } catch (Exception e)
+            /*} catch (Exception e)
             {
                 Console.WriteLine(e);
-            }
+            }*/
         }
 
         private void NoSuchCommandInfo(string cmdName)

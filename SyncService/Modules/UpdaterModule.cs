@@ -8,6 +8,8 @@ namespace SyncService.Modules
 {
     public class UpdaterModule : IUpdaterModule
     {
+        private const int INTERVAL = 10000;
+
         public bool IsActive { get; set; }
 
         public event Action<IUpdaterModule, IList<string>> OnUpdateAlienChanges;
@@ -19,7 +21,7 @@ namespace SyncService.Modules
         {
             IsActive = false;
             outdatedServices = new List<string>();
-            debouncedInvokeUpdateAlienChanges = Debounce(2000, () =>
+            debouncedInvokeUpdateAlienChanges = Debounce(INTERVAL, () =>
             {
                 lock (outdatedServices)
                 {

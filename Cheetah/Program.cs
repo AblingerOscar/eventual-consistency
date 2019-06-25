@@ -62,6 +62,7 @@ namespace Cheetah
 
             AddCLICommands();
             AddServiceCommands();
+            AddFileManagementCommands();
             AddLoggingCommands();
             cli.Start();
         }
@@ -139,6 +140,39 @@ namespace Cheetah
                 );
         }
 
+        private void AddFileManagementCommands()
+        {
+            cli.AddCommand(
+                "upload",
+                UploadCommand,
+                new string[]
+                {
+                    "Uploads a local file to a service.",
+                    "The local file path originates from 'exampleFiles/'",
+                    "Usage: upload <serviceID> <name to upload as> <local file path>"
+                }
+                );
+            cli.AddCommand(
+                "update",
+                UpdateCommand,
+                new string[]
+                {
+                    "Updates a file from a service with the contents of an local file.",
+                    "The local file path originates from 'exampleFiles/'",
+                    "Usage: update <serviceID> <name to upload as> <local file path>"
+                }
+                );
+            cli.AddCommand(
+                "delete",
+                DeleteCommand,
+                new string[]
+                {
+                    "Deletes a file from a service",
+                    "Usage: delete <serviceID> <fileName>"
+                }
+                );
+        }
+
         private void AddLoggingCommands()
         {
             cli.AddCommand(
@@ -165,7 +199,7 @@ namespace Cheetah
 
         private ServiceInformation ReadServiceInformation(Arguments args, string helpCommand, int argsPosition = 1)
         {
-            if (args.ArgumentList.Length  < argsPosition + 1)
+            if (args.ArgumentList.Length < argsPosition + 1)
             {
                 cli.DispatchCommand(helpCommand);
                 return null;
@@ -252,6 +286,38 @@ namespace Cheetah
 
             foreach (var service in services)
                 Console.WriteLine(service.ToString());
+        }
+
+        private void UploadCommand(Arguments args)
+        {
+            if (args.ArgumentList.Count() != 4)
+                cli.DispatchCommand("help upload");
+
+            var si = ReadServiceInformation(args, "help upload");
+            var fileName = args.ArgumentList[2];
+            var filePath = args.ArgumentList[3];
+            serviceController.UploadFile(si, fileName, filePath);
+        }
+
+        private void UpdateCommand(Arguments args)
+        {
+            if (args.ArgumentList.Count() != 4)
+                cli.DispatchCommand("help update");
+
+            var si = ReadServiceInformation(args, "help update");
+            var fileName = args.ArgumentList[2];
+            var filePath = args.ArgumentList[3];
+            serviceController.UpdateFile(si, fileName, filePath);
+        }
+
+        private void DeleteCommand(Arguments args)
+        {
+            if (args.ArgumentList.Count() != 3)
+                cli.DispatchCommand("help delete");
+
+            var si = ReadServiceInformation(args, "help delete");
+            var fileName = args.ArgumentList[2];
+            serviceController.DeleteFile(si, fileName);
         }
         
         private void HideCommand(Arguments args)
