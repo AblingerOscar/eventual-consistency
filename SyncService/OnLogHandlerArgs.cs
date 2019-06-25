@@ -9,7 +9,8 @@
     {
         DEBUG, ERROR, STATUSCHANGE,
         RABBITMQ_COMMUNICATION,
-        USER_INFO
+        USER_INFO,
+        FILE_CONFLICT
     }
 
     public class OnLogHandlerArgs

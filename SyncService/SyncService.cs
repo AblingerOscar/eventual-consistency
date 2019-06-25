@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using SharedClasses.DataObjects;
+using SharedClasses.DataObjects.ChangeMetaData;
 using SyncService.Modules;
 using SyncService.Modules.Heartbeat;
 
@@ -25,12 +26,17 @@ namespace SyncService
         private IHeartbeatModule heartbeatModule;
         private IMetaDataShareModule metaDataModule;
         private IUpdaterModule updaterModule;
+        private IFileManagerModule fileManagerModule;
 
-        public SyncService()
+        public SyncService(string uid, string syncPath, string savePath)
         {
+            UID = uid;
+            SyncPath = syncPath;
+            SavePath = savePath;
             SetUpHeartbeatModule();
             SetUpMetaDataShareModule();
             SetUpUpdaterModule();
+            SetUpFileManagerModule();
         }
 
         private void SetUpHeartbeatModule()
@@ -77,9 +83,10 @@ namespace SyncService
                     args.MetaDataAnswer.DomesticChanges
                 };
 
-                foreach(var changeSet in changes)
+                foreach (var changeSet in changes)
                 {
                     var changeData = changeSet.Changes.OrderBy(c => c.TimeStamp).ToList();
+                    fileManagerModule.ApplyChanges(changeData);
                     data.AddSortedAlienChanges(changeSet.ServiceUID, changeData);
                 }
             };
@@ -92,6 +99,31 @@ namespace SyncService
             {
                 heartbeatModule.SendHeartbeat();
             };
+        }
+
+        private void SetUpFileManagerModule()
+        {
+            fileManagerModule = new FileManagerModule(SyncPath, GetSortedSavedChanges);
+
+            fileManagerModule.OnConflictArises += (source, args) =>
+            {
+                OnLog?.Invoke(this, new OnLogHandlerArgs(
+                    $"({args.ContextMetaData.DomesticServiceId}:{args.ContextMetaData.FileName}) " + args.Message,
+                    LogReason.FILE_CONFLICT));
+            };
+        }
+
+        private IList<FileChangeMetaData> GetSortedSavedChanges()
+        {
+            var changes = new List<FileChangeMetaData>(data.DomesticChanges);
+
+            foreach (var alienChangesKVP in data.AlienChanges)
+            {
+                changes.AddRange(alienChangesKVP.Value);
+            }
+
+            SyncData.Sort(changes);
+            return changes;
         }
 
         public void Abort()
@@ -109,12 +141,9 @@ namespace SyncService
             OnLog?.Invoke(this, new OnLogHandlerArgs("Service Shut down", LogReason.STATUSCHANGE));
         }
 
-        public void StartUp(string uid, string syncPath, string savePath)
+        public void StartUp()
         {
             IsRunning = true;
-            UID = uid;
-            SyncPath = syncPath;
-            SavePath = savePath;
             LoadSavedData();
             ActivateModules();
             heartbeatModule.SendHeartbeat();

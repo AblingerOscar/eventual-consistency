@@ -23,6 +23,11 @@ namespace SyncService
             SortAlienChanges();
         }
 
+        public static void Sort(List<FileChangeMetaData> changes)
+        {
+            changes.Sort((x, y) => DateTime.Compare(x.TimeStamp, y.TimeStamp));
+        }
+
         public void AddSortedDomesticChanges(IList<FileChangeMetaData> sortedChanges)
         {
             var needsSorting = LastElementTimeStampOf(DomesticChanges) < LastElementTimeStampOf(sortedChanges);
@@ -50,20 +55,15 @@ namespace SyncService
 
         private void SortDomesticChanges()
         {
-            DomesticChanges.Sort((x, y) => DateTime.Compare(x.TimeStamp, y.TimeStamp));
+            Sort(DomesticChanges);
         }
 
         private void SortAlienChanges()
         {
             foreach (var alienChange in AlienChanges)
             {
-                SortAlienChanges(alienChange.Key);
+                Sort(alienChange.Value);
             }
-        }
-
-        private void SortAlienChanges(string serviceId)
-        {
-            AlienChanges[serviceId].Sort((x, y) => DateTime.Compare(x.TimeStamp, y.TimeStamp));
         }
     }
 }
