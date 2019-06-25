@@ -73,7 +73,7 @@ namespace Cheetah.ServiceController
 
         public bool UploadFile(ServiceInformation si, string fileName, string localFilePath)
         {
-            string content = null;
+            string content;
             try
             {
                 content = File.ReadAllText(Path.Combine(PersistenceConfiguration.ExampleFilesDirectory, localFilePath));

@@ -2,6 +2,7 @@
 using System;
 using SyncService;
 using System.Text;
+using System.IO;
 
 namespace Cheetah.ServiceController
 {
@@ -28,10 +29,24 @@ namespace Cheetah.ServiceController
             sb.AppendLine($"Service id: {ID}\n" + $"is active: {IsRunning}");
             if (IsRunning)
             {
-                sb.AppendLine($"\tLast known change times of other services:");
+                sb.AppendLine("Last known change times of other services:");
                 foreach (var changeKvp in Service.LastKnownChangeTime)
                 {
                     sb.AppendLine($"\t- {changeKvp.Key}: {changeKvp.Value}");
+                }
+
+                sb.AppendLine("Known Files on the Service:");
+                foreach (var fileKvp in Service.GetAllFiles())
+                {
+                    string output = $"\t{Path.GetFileName(fileKvp.Item1)}: " +
+                        fileKvp.Item2
+                            .Replace('\n', ' ')
+                            .Replace("\t", "  ");
+                    if (output.Length > 80)
+                    {
+                        output = output.Substring(0, 76) + "...";
+                    }
+                    sb.AppendLine(output);
                 }
             }
             return sb.ToString();

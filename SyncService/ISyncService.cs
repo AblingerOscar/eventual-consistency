@@ -40,5 +40,11 @@ namespace SyncService
         /// The last known change times for each other service, not including its own
         /// </summary>
         IDictionary<string, DateTime> LastKnownChangeTime { get; }
+
+        /// <summary>
+        /// Returns all files that are currently saved and their contents
+        /// </summary>
+        /// <returns>A list of tuples, where the first value is the file name and the second the content</returns>
+        IList<Tuple<string, string>> GetAllFiles();
     }
 }

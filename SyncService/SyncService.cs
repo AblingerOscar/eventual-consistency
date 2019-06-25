@@ -172,6 +172,14 @@ namespace SyncService
             ActivateModules();
             heartbeatModule.SendHeartbeat();
         }
+
+        public IList<Tuple<string, string>> GetAllFiles()
+        {
+            if (!IsRunning)
+                throw new InvalidOperationException("Service is not running");
+
+            return fileManagerModule.GetAllFiles();
+        }
         #endregion
 
         #region Private Helper methods
