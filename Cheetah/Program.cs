@@ -101,7 +101,7 @@ namespace Cheetah
                 "create",
                 AddCommand,
                 new string[] {
-                    "Creates a new service and a client for it",
+                    "Creates a new service",
                     "Option --start will also start them",
                     "Usage: create [--start]"
                 }
