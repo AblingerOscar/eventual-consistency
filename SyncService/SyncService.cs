@@ -106,6 +106,7 @@ namespace SyncService
                 {
                     fileManagerModule.ApplyChanges(changeData);
                     data.AddSortedAlienChanges(changeSet.ServiceUID, changeData);
+                    SaveData();
                 }
             }
         }
@@ -155,6 +156,8 @@ namespace SyncService
             IsRunning = false;
             DeactivateModules();
             OnLog?.Invoke(this, new OnLogHandlerArgs("Service Aborted", LogReason.STATUSCHANGE));
+            // Wait for writes to conclude
+            lock (data) { }
         }
 
         public void ShutDown()
@@ -321,6 +324,7 @@ namespace SyncService
             {
                 var change = fileManagerModule.AddFile(fileName, content);
                 data.AddSortedDomesticChanges(new List<FileChangeMetaData>() { change });
+                SaveData();
             }
         }
 
@@ -333,6 +337,7 @@ namespace SyncService
             {
                 var change = fileManagerModule.DeleteFile(fileName);
                 data.AddSortedDomesticChanges(new List<FileChangeMetaData>() { change });
+                SaveData();
             }
         }
 
@@ -345,6 +350,7 @@ namespace SyncService
             {
                 var change = fileManagerModule.UpdateFile(fileName, content);
                 data.AddSortedDomesticChanges(new List<FileChangeMetaData>() { change });
+                SaveData();
             }
         }
         #endregion
